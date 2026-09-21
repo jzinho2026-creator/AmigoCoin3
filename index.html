@@ -10,1117 +10,170 @@
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 </head>
 <body>
 <div id="toast" class="toast"></div>
 <div id="payment-modal" class="modal hidden"><div class="modal-card"><h3 id="modal-title">Pagamento por QR Code</h3><p id="modal-text" class="muted small"></p><div id="payment-qr" class="qr"></div><p id="modal-token" class="pay-token"></p><button id="close-payment" class="secondary full">Fechar</button></div></div>
-
 <section id="auth" class="auth">
-<div class="auth-card">
-<div class="logo">🪙</div><h1 class="brand">Amigo<span>Coin</span></h1><p class="tagline muted">Converse, jogue e ganhe moedas.</p>
-<div class="tabs"><button id="login-tab" class="active">Entrar</button><button id="register-tab">Criar conta</button></div>
-<form id="auth-form">
-<label class="field">Nome de usuário<input id="username" minlength="3" maxlength="24" required placeholder="Ex.: ana123"></label>
-<label class="field">Senha<input id="password" type="password" minlength="6" required placeholder="Mínimo de 6 caracteres"></label>
-<button id="auth-submit" class="primary full">Entrar agora</button>
-</form>
-<p id="auth-hint" class="hint">Entre com seu nome e senha.</p>
-</div>
+  <div class="auth-card">
+    <div class="logo">🪙</div><h1 class="brand">Amigo<span>Coin</span></h1><p class="tagline muted">Converse, jogue e ganhe moedas.</p>
+    <div class="tabs"><button id="login-tab" class="active">Entrar</button><button id="register-tab">Criar conta</button></div>
+    <form id="auth-form">
+      <label class="field">Nome de usuário<input id="username" minlength="3" maxlength="24" required placeholder="Ex.: ana123"></label>
+      <label class="field">Senha<input id="password" type="password" minlength="6" required placeholder="Mínimo de 6 caracteres"></label>
+      <button id="auth-submit" class="primary full">Entrar agora</button>
+    </form>
+    <p id="auth-hint" class="hint">Entre com seu nome e senha.</p>
+  </div>
 </section>
 
 <main id="app" class="app hidden">
 <header class="top"><div class="top-brand">🪙 Amigo<span class="orange">Coin</span></div><div class="wallet">🪙 <b id="coins-top">0</b></div></header>
 <div class="content">
-
 <section id="home" class="view active">
-<div class="heading"><div><p class="eyebrow">BEM-VINDO</p><h2>Olá, <span id="hello"></span>!</h2></div><span class="heading-icon">👋</span></div>
-<div id="time-panel" class="panel balance"><div><small>Tempo restante do app</small><strong id="time-left">--</strong><div class="timebar"><i id="time-progress"></i></div></div><span class="star">⏳</span></div>
-<div class="grid"><div class="stat"><b id="coins-home">0</b><span>moedas disponíveis</span></div><div class="stat"><b id="correct-home">0</b><span>acertos no jogo</span></div></div>
-<div class="panel" style="margin-top:18px"><h3>Como funciona?</h3><p class="muted small">Você começa com <b class="orange">1 dia grátis</b>. Resolva contas de matemática e ganhe <b class="orange">2 moedas por acerto</b>. Use suas moedas na loja para comprar mais tempo.</p><button class="primary full" onclick="showView('game')">Jogar matemática 🎯</button></div>
+  <div class="heading"><div><p class="eyebrow">BEM-VINDO</p><h2>Olá, <span id="hello"></span>!</h2></div><span class="heading-icon">👋</span></div>
+  <div id="time-panel" class="panel balance"><div><small>Tempo restante do app</small><strong id="time-left">--</strong><div class="timebar"><i id="time-progress"></i></div></div><span class="star">⏳</span></div>
+  <div class="grid"><div class="stat"><b id="coins-home">0</b><span>moedas disponíveis</span></div><div class="stat"><b id="correct-home">0</b><span>acertos no jogo</span></div></div>
+  <div class="panel" style="margin-top:18px"><h3>Como funciona?</h3><p class="muted small">Você começa com <b class="orange">1 dia grátis</b>. Resolva contas de matemática e ganhe <b class="orange">2 moedas por acerto</b>. Use suas moedas na loja para comprar mais tempo.</p><button class="primary full" onclick="showView('game')">Jogar matemática 🎯</button></div>
 </section>
-
 <section id="friends" class="view">
-<div class="heading"><div><p class="eyebrow">SUA REDE</p><h2>Amigos</h2></div><span class="heading-icon">👥</span></div>
-<div id="friends-locked" class="panel expired hidden"><h3>Tempo encerrado</h3><p class="muted small">Renove seu tempo na loja para adicionar amigos.</p><button class="danger full" onclick="showView('store')">Abrir loja</button></div>
-<div id="friends-content">
-<div class="panel">
-<h3>Adicionar amigo</h3>
-<p class="muted small">Digite o nome de usuário ou o ID AMG da pessoa cadastrada. A outra pessoa precisa aceitar o pedido.</p>
-<form id="friend-form" class="row"><input id="friend-name" minlength="3" placeholder="Nome ou ID AMG" required><button class="primary">Buscar</button></form>
-</div>
-<div id="friend-preview-panel" class="panel hidden">
-<div class="profile-preview"><div id="friend-preview-avatar" class="avatar">🙂</div><div><h3 id="friend-preview-name" style="margin:0">Usuário</h3><small id="friend-preview-id" class="muted"></small></div></div>
-<div class="preview-stats"><div class="preview-stat"><b id="friend-preview-coins">0</b>moedas</div><div class="preview-stat"><b id="friend-preview-likes">0</b>likes</div></div>
-<div class="friend-actions"><button id="friend-preview-like" type="button" class="secondary like-btn">♡ Curtir</button><button id="friend-preview-add" type="button" class="primary">Enviar pedido</button></div>
-</div>
-<div id="friend-requests-panel" class="panel hidden"><h3>Pedidos recebidos</h3><div id="friend-requests" class="friends-list"></div></div>
-<div class="panel"><h3>Minha lista</h3><div id="friends-list" class="friends-list"></div></div>
-</div>
+  <div class="heading"><div><p class="eyebrow">SUA REDE</p><h2>Amigos</h2></div><span class="heading-icon">👥</span></div>
+  <div id="friends-locked" class="panel expired hidden"><h3>Tempo encerrado</h3><p class="muted small">Renove seu tempo na loja para adicionar amigos.</p><button class="danger full" onclick="showView('store')">Abrir loja</button></div>
+  <div id="friends-content"><div class="panel"><h3>Adicionar amigo</h3><p class="muted small">Digite o nome de usuário ou o ID AMG da pessoa cadastrada. A outra pessoa precisa aceitar o pedido.</p><form id="friend-form" class="row"><input id="friend-name" minlength="3" placeholder="Nome ou ID AMG" required><button class="primary">Buscar</button></form></div><div id="friend-preview-panel" class="panel hidden"><div class="profile-preview"><div id="friend-preview-avatar" class="avatar">🙂</div><div><h3 id="friend-preview-name" style="margin:0">Usuário</h3><small id="friend-preview-id" class="muted"></small></div></div><div class="preview-stats"><div class="preview-stat"><b id="friend-preview-coins">0</b>moedas</div><div class="preview-stat"><b id="friend-preview-likes">0</b>likes</div></div><div class="friend-actions"><button id="friend-preview-like" type="button" class="secondary like-btn">♡ Curtir</button><button id="friend-preview-add" type="button" class="primary">Enviar pedido</button></div></div><div id="friend-requests-panel" class="panel hidden"><h3>Pedidos recebidos</h3><div id="friend-requests" class="friends-list"></div></div><div class="panel"><h3>Minha lista</h3><div id="friends-list" class="friends-list"></div></div></div>
 </section>
-
 <section id="chats" class="view">
-<div class="heading"><div><p class="eyebrow">CONVERSAS</p><h2>Mensagens</h2></div><span class="heading-icon">💬</span></div>
-<div id="chats-locked" class="panel expired hidden"><h3>Tempo encerrado</h3><p class="muted small">Renove seu tempo na loja para continuar conversando.</p><button class="danger full" onclick="showView('store')">Abrir loja</button></div>
-<div id="chat-content">
-<div id="chat-empty" class="panel empty">Escolha um amigo na aba <b>Amigos</b> para abrir uma conversa.</div>
-<div id="chat-box" class="panel chat-box hidden">
-<div class="chat-title"><div id="chat-avatar" class="avatar">🙂</div><div><b id="chat-name">Amigo</b><small id="chat-user" class="muted"></small></div></div>
-<div id="chat-messages" class="chat-messages"></div>
-<form id="message-form" class="row"><input id="message-input" maxlength="500" placeholder="Escreva uma mensagem..."><button type="button" id="record-audio" class="secondary audio-btn">🎙️</button><button type="button" id="choose-audio" class="secondary audio-btn">📎</button><input id="audio-input" type="file" accept="audio/*" capture hidden><button class="primary">Enviar</button></form>
-</div>
-</div>
+  <div class="heading"><div><p class="eyebrow">CONVERSAS</p><h2>Mensagens</h2></div><span class="heading-icon">💬</span></div>
+  <div id="chats-locked" class="panel expired hidden"><h3>Tempo encerrado</h3><p class="muted small">Renove seu tempo na loja para continuar conversando.</p><button class="danger full" onclick="showView('store')">Abrir loja</button></div>
+  <div id="chat-content"><div id="chat-empty" class="panel empty">Escolha um amigo na aba <b>Amigos</b> para abrir uma conversa.</div><div id="chat-box" class="panel chat-box hidden"><div class="chat-title"><div id="chat-avatar" class="avatar">🙂</div><div><b id="chat-name">Amigo</b><small id="chat-user" class="muted"></small></div></div><div id="chat-messages" class="chat-messages"></div><form id="message-form" class="row"><input id="message-input" maxlength="500" placeholder="Escreva uma mensagem..."><button type="button" id="record-audio" class="secondary audio-btn">🎙️</button><button type="button" id="choose-audio" class="secondary audio-btn">📎</button><input id="audio-input" type="file" accept="audio/*" capture hidden><button class="primary">Enviar</button></form></div></div>
 </section>
-
 <section id="game" class="view">
-<div class="heading"><div><p class="eyebrow">GANHE MOEDAS</p><h2>Jogo da matemática</h2></div><span class="heading-icon">➗</span></div>
-<div id="game-locked" class="panel expired hidden"><h3>Seu tempo acabou</h3><p class="muted small">Compre mais tempo na loja para continuar jogando e ganhar moedas.</p><button class="danger full" onclick="showView('store')">Ir para a loja</button></div>
-<div id="game-card" class="panel"><div class="game-info"><span>Acertos: <b id="correct-game">0</b></span><span>+2 moedas por acerto</span></div><div id="question" class="question">—</div><form id="answer-form" class="game-answer"><input id="answer" type="number" inputmode="numeric" placeholder="Resposta" required><button class="primary">Responder</button></form><p id="game-message" class="message"></p></div>
+  <div class="heading"><div><p class="eyebrow">GANHE MOEDAS</p><h2>Jogo da matemática</h2></div><span class="heading-icon">➗</span></div>
+  <div id="game-locked" class="panel expired hidden"><h3>Seu tempo acabou</h3><p class="muted small">Compre mais tempo na loja para continuar jogando e ganhar moedas.</p><button class="danger full" onclick="showView('store')">Ir para a loja</button></div>
+  <div id="game-card" class="panel"><div class="game-info"><span>Acertos: <b id="correct-game">0</b></span><span>+2 moedas por acerto</span></div><div id="question" class="question">—</div><form id="answer-form" class="game-answer"><input id="answer" type="number" inputmode="numeric" placeholder="Resposta" required><button class="primary">Responder</button></form><p id="game-message" class="message"></p></div>
 </section>
-
 <section id="store" class="view">
-<div class="heading"><div><p class="eyebrow">USE SUAS MOEDAS</p><h2>Loja de tempo</h2></div><span class="heading-icon">🛒</span></div>
-<div class="panel balance"><div><small>Seu saldo</small><strong><span id="coins-store">0</span> 🪙</strong></div><span class="star">✦</span></div>
-<p class="muted small">Compre tempo de acesso usando as moedas que você ganhou no jogo.</p>
-<div class="packages">
-<div class="package"><h3>+1 dia</h3><p>Mais 24 horas de acesso.</p><button onclick="buyTime(1,10)">10 🪙</button></div>
-<div class="package"><h3>+7 dias</h3><p>Uma semana completa.</p><button onclick="buyTime(7,50)">50 🪙</button></div>
-<div class="package"><h3>+30 dias</h3><p>Um mês de acesso.</p><button onclick="buyTime(30,150)">150 🪙</button></div>
-</div>
-<h3 style="margin-top:25px">Comprar moedas</h3><p class="muted small">Escolha um pacote. Um QR Code será criado e o pagamento só será concluído quando outra conta escanear esse código.</p>
-<div class="packages">
-<div class="package"><h3>50 🪙</h3><p>Pacote inicial · R$ 5,00</p><button onclick="startCoinPurchase(50,5)">Gerar QR Code</button></div>
-<div class="package"><h3>120 🪙</h3><p>Pacote médio · R$ 10,00</p><button onclick="startCoinPurchase(120,10)">Gerar QR Code</button></div>
-<div class="package"><h3>300 🪙</h3><p>Pacote grande · R$ 20,00</p><button onclick="startCoinPurchase(300,20)">Gerar QR Code</button></div>
-</div>
-<div class="panel"><h3>Escanear objeto e ganhar moedas</h3><p class="muted small">O administrador cadastra um objeto e define a recompensa. Escaneie o mesmo objeto para receber as moedas.</p><p class="code-id">Recompensa: <b id="object-reward">4</b> 🪙</p><button id="object-scan" class="secondary full">📷 Escanear objeto</button><video id="object-camera" class="camera hidden" playsinline></video><p id="object-scan-status" class="message"></p></div>
-<div class="panel" style="margin-top:18px"><h3>Resgatar código</h3><p class="muted small">Digite seu código de moedas.</p><form id="redeem-form" class="code-box"><input id="redeem-code" placeholder="Digite o código" required><button class="primary">Resgatar</button></form><button id="camera-store" class="secondary full" style="margin-top:10px">📷 Abrir câmera</button><button id="gallery-store" class="secondary full" style="margin-top:8px">📁 Ler QR da galeria</button><input id="gallery-store-input" type="file" accept="image/*" hidden><video id="store-camera" class="camera hidden" playsinline></video></div>
+  <div class="heading"><div><p class="eyebrow">USE SUAS MOEDAS</p><h2>Loja de tempo</h2></div><span class="heading-icon">🛒</span></div>
+  <div class="panel balance"><div><small>Seu saldo</small><strong><span id="coins-store">0</span> 🪙</strong></div><span class="star">✦</span></div>
+  <p class="muted small">Compre tempo de acesso usando as moedas que você ganhou no jogo.</p>
+  <div class="packages">
+    <div class="package"><h3>+1 dia</h3><p>Mais 24 horas de acesso.</p><button onclick="buyTime(1,10)">10 🪙</button></div>
+    <div class="package"><h3>+7 dias</h3><p>Uma semana completa.</p><button onclick="buyTime(7,50)">50 🪙</button></div>
+    <div class="package"><h3>+30 dias</h3><p>Um mês de acesso.</p><button onclick="buyTime(30,150)">150 🪙</button></div>
+  </div>
+  <h3 style="margin-top:25px">Comprar moedas</h3><p class="muted small">Escolha um pacote. Um QR Code será criado e o pagamento só será concluído quando outra conta escanear esse código.</p>
+  <div class="packages"><div class="package"><h3>50 🪙</h3><p>Pacote inicial · R$ 5,00</p><button onclick="startCoinPurchase(50,5)">Gerar QR Code</button></div><div class="package"><h3>120 🪙</h3><p>Pacote médio · R$ 10,00</p><button onclick="startCoinPurchase(120,10)">Gerar QR Code</button></div><div class="package"><h3>300 🪙</h3><p>Pacote grande · R$ 20,00</p><button onclick="startCoinPurchase(300,20)">Gerar QR Code</button></div></div>
+  <div class="panel"><h3>Escanear objeto e ganhar moedas</h3><p class="muted small">O administrador cadastra um objeto e define a recompensa. Escaneie o mesmo objeto para receber as moedas.</p><p class="code-id">Recompensa: <b id="object-reward">4</b> 🪙</p><button id="object-scan" class="secondary full">📷 Escanear objeto</button><video id="object-camera" class="camera hidden" playsinline></video><p id="object-scan-status" class="message"></p></div>
+  <div class="panel" style="margin-top:18px"><h3>Resgatar código</h3><p class="muted small">Digite seu código de moedas.</p><form id="redeem-form" class="code-box"><input id="redeem-code" placeholder="Digite o código" required><button class="primary">Resgatar</button></form><button id="camera-store" class="secondary full" style="margin-top:10px">📷 Abrir câmera</button><button id="gallery-store" class="secondary full" style="margin-top:8px">📁 Ler QR da galeria</button><input id="gallery-store-input" type="file" accept="image/*" hidden><video id="store-camera" class="camera hidden" playsinline></video></div>
 </section>
-
 <section id="mail" class="view">
-<div class="heading"><div><p class="eyebrow">AVISOS E PRESENTES</p><h2>Correio</h2></div><span class="heading-icon">📨</span></div>
-<div class="panel"><p class="muted small">Avisos enviados pelo AmigoCoin aparecem aqui.</p><div id="mail-list" class="friends-list"><div class="empty">Nenhuma mensagem.</div></div></div>
-<div class="panel"><h3>Histórico de moedas</h3><p class="muted small">Veja quem enviou ou recebeu moedas.</p><div id="coin-history" class="friends-list"><div class="empty">Nenhuma transferência ainda.</div></div></div>
+  <div class="heading"><div><p class="eyebrow">AVISOS E PRESENTES</p><h2>Correio</h2></div><span class="heading-icon">📨</span></div>
+  <div class="panel"><p class="muted small">Avisos enviados pelo AmigoCoin aparecem aqui.</p><div id="mail-list" class="friends-list"><div class="empty">Nenhuma mensagem.</div></div></div><div class="panel"><h3>Histórico de moedas</h3><p class="muted small">Veja quem enviou ou recebeu moedas.</p><div id="coin-history" class="friends-list"><div class="empty">Nenhuma transferência ainda.</div></div></div>
 </section>
-
 <section id="pay" class="view">
-<div class="heading"><div><p class="eyebrow">ENVIE MOEDAS</p><h2>Pagar</h2></div><span class="heading-icon">💸</span></div>
-<div id="pay-locked" class="panel expired hidden"><h3>Tempo encerrado</h3><p class="muted small">Renove seu tempo para fazer pagamentos.</p><button class="danger full" onclick="showView('store')">Abrir loja</button></div>
-<div id="pay-content" class="panel"><h3>Pagamento entre contas</h3><p class="muted small">O recebedor gera um QR Code. O pagador escaneia e as moedas são transferidas somente nesse momento.</p>
-<form id="pay-form"><label class="field">Recebedor<input id="pay-target" placeholder="nome ou AMG-XXXX-XXXX" required></label><label class="field">Quantidade de moedas<input id="pay-amount" type="number" min="1" step="1" placeholder="Ex.: 10" required></label><button class="primary full">Gerar QR Code de cobrança</button></form>
-<div class="scan-area"><h3>Escanear um pagamento</h3><input id="scan-code" placeholder="Cole o código do QR, se necessário"><button id="scan-confirm" class="secondary full" style="margin-top:8px">Confirmar código escaneado</button><button id="camera-pay" class="secondary full" style="margin-top:8px">📷 Abrir câmera e escanear</button><button id="gallery-pay" class="secondary full" style="margin-top:8px">📁 Ler QR da galeria</button><input id="gallery-pay-input" type="file" accept="image/*" hidden><video id="pay-camera" class="hidden" playsinline></video></div></div>
+  <div class="heading"><div><p class="eyebrow">ENVIE MOEDAS</p><h2>Pagar</h2></div><span class="heading-icon">💸</span></div>
+  <div id="pay-locked" class="panel expired hidden"><h3>Tempo encerrado</h3><p class="muted small">Renove seu tempo para fazer pagamentos.</p><button class="danger full" onclick="showView('store')">Abrir loja</button></div>
+  <div id="pay-content" class="panel"><h3>Pagamento entre contas</h3><p class="muted small">O recebedor gera um QR Code. O pagador escaneia e as moedas são transferidas somente nesse momento.</p><form id="pay-form"><label class="field">Recebedor<input id="pay-target" placeholder="nome ou AMG-XXXX-XXXX" required></label><label class="field">Quantidade de moedas<input id="pay-amount" type="number" min="1" step="1" placeholder="Ex.: 10" required></label><button class="primary full">Gerar QR Code de cobrança</button></form><div class="scan-area"><h3>Escanear um pagamento</h3><input id="scan-code" placeholder="Cole o código do QR, se necessário"><button id="scan-confirm" class="secondary full" style="margin-top:8px">Confirmar código escaneado</button><button id="camera-pay" class="secondary full" style="margin-top:8px">📷 Abrir câmera e escanear</button><button id="gallery-pay" class="secondary full" style="margin-top:8px">📁 Ler QR da galeria</button><input id="gallery-pay-input" type="file" accept="image/*" hidden><video id="pay-camera" class="hidden" playsinline></video></div></div>
 </section>
-
 <section id="profile" class="view">
-<div class="heading"><div><p class="eyebrow">SUA CONTA</p><h2>Perfil</h2></div><span class="heading-icon">👤</span></div>
-<div class="panel profile"><div id="profile-avatar" class="avatar">🙂</div><input id="photo-input" type="file" accept="image/*" hidden><label for="photo-input" class="secondary profile-photo-btn">📷 Escolher foto</label><h3 id="profile-name">—</h3><p class="muted small">Conta local do AmigoCoin</p><div id="profile-id" class="code-id">AMG-</div><br><button class="secondary" onclick="copyId()">Copiar meu ID</button><hr style="border:0;border-top:1px solid var(--line);margin:20px 0"><p class="muted small">Primeiro acesso</p><b id="created-at">—</b><br><button id="logout" class="danger" style="margin-top:22px">Sair da conta</button></div>
-<p class="muted small">Os dados são sincronizados com o Firebase quando disponível e mantidos localmente como apoio. Para produção, use Firebase Authentication e nunca guarde senhas em texto aberto.</p>
+  <div class="heading"><div><p class="eyebrow">SUA CONTA</p><h2>Perfil</h2></div><span class="heading-icon">👤</span></div>
+  <div class="panel profile"><div id="profile-avatar" class="avatar">🙂</div><input id="photo-input" type="file" accept="image/*" hidden><label for="photo-input" class="secondary profile-photo-btn">📷 Escolher foto</label><h3 id="profile-name">—</h3><p class="muted small">Conta local do AmigoCoin</p><div id="profile-id" class="code-id">AMG-</div><br><button class="secondary" onclick="copyId()">Copiar meu ID</button><hr style="border:0;border-top:1px solid var(--line);margin:20px 0"><p class="muted small">Primeiro acesso</p><b id="created-at">—</b><br><button id="logout" class="danger" style="margin-top:22px">Sair da conta</button></div>
+  <p class="muted small">Os dados são sincronizados com o Firebase quando disponível e mantidos localmente como apoio. Para produção, use Firebase Authentication e nunca guarde senhas em texto aberto.</p>
 </section>
-
 </div>
 <nav class="nav"><button data-view="home" class="active"><span>🏠</span>Início</button><button data-view="friends"><span>👥</span>Amigos</button><button data-view="chats"><span>💬</span>Chat<span id="chat-unread-badge" class="unread-badge hidden">!</span></button><button data-view="game"><span>🎯</span>Jogo</button><button data-view="pay"><span>💸</span>Pagar</button><button data-view="mail"><span>📨</span>Correio</button><button data-view="store"><span>🛒</span>Loja</button><button data-view="profile"><span>👤</span>Perfil</button></nav>
 </main>
-
 <script>
 'use strict';
-
-const KEY='amigocoin_users_v1',SESSION='amigocoin_session_v1',MSGKEY='amigocoin_messages_v1',PAYKEY='amigocoin_payments_v1';
+const KEY='amigocoin_users_v1', SESSION='amigocoin_session_v1', MSGKEY='amigocoin_messages_v1', PAYKEY='amigocoin_payments_v1';
 const firebaseConfig={apiKey:'AIzaSyBhPYFmWINRTCxxeau1cHhVWMejhJhirbI',authDomain:'chat01-beec4.firebaseapp.com',databaseURL:'https://chat01-beec4-default-rtdb.firebaseio.com',projectId:'chat01-beec4'};
-const REST_DB_URL=firebaseConfig.databaseURL.replace(/\/$/,'');
-let firebaseDB=null,restSyncTimer=null,globalSettings={},mode='login',current=null,answerValue=0,timer,activeChat=null,lastMessageCount=0,remoteFriendRequests={},mediaRecorder=null,audioChunks=[],audioTimer=null,previewTarget=null,unreadChats={},messageHydrated=false,sessionOpenedAt=Date.now(),lastSeenMessageAt=Date.now();
-
+const REST_DB_URL=firebaseConfig.databaseURL.replace(/\/$/,'');let firebaseDB=null,restSyncTimer=null,globalSettings={},mode='login', current=null, answerValue=0, timer, activeChat=null, lastMessageCount=0, remoteFriendRequests={}, mediaRecorder=null, audioChunks=[], audioTimer=null, previewTarget=null, unreadChats={},messageHydrated=false,sessionOpenedAt=Date.now(),lastSeenMessageAt=Date.now();
 const $=id=>document.getElementById(id);
-
 function users(){return JSON.parse(localStorage.getItem(KEY)||'{}')}
 function cleanUser(u){if(!u)return u;const copy={...u};delete copy._key;delete copy.pass;return copy}
 function syncUser(name){if(firebaseDB&&name){const u=users()[name];if(u)firebaseDB.ref('users/'+name).update(cleanUser(u)).catch(()=>{})}}
 function saveUsers(data){localStorage.setItem(KEY,JSON.stringify(data));if(firebaseDB&&current&&data[current])firebaseDB.ref('users/'+current).update(cleanUser(data[current])).catch(()=>{})}
-function restRead(path){return fetch(`\({REST_DB_URL}/\){path}.json?ts=${Date.now()}`).then(r=>r.ok?r.json():null)}
+function restRead(path){return fetch(`${REST_DB_URL}/${path}.json?ts=${Date.now()}`).then(r=>r.ok?r.json():null)}
 function restPatch(updates){return fetch(`${REST_DB_URL}/.json`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(updates)}).then(r=>{if(!r.ok)throw new Error('Firebase indisponível');return r.json()})}
-
-function startRestSync(){
-clearInterval(restSyncTimer);
-const poll=()=>{
-if(!current)return;
-Promise.all([restRead('users'),restRead('friendRequests/'+current),restRead('messages')]).then(([remote,requests,remoteMessages])=>{
-if(remote){
-const local=users(),merged={...local};
-Object.entries(remote).forEach(([k,v])=>{merged[k]={...(local[k]||{}),...v}});
-localStorage.setItem(KEY,JSON.stringify(merged));
-remoteFriendRequests=requests||{};
-if(remoteMessages){
-const msg=messages();
-Object.entries(remoteMessages).forEach(([k,b])=>{msg[k]=Object.values(b||{})});
-localStorage.setItem(MSGKEY,JSON.stringify(msg));
-}
-renderFriends();
-if(activeChat)renderChat();
-update();
-}
-}).catch(()=>{});
-};
-poll();
-restSyncTimer=setInterval(poll,2000);
-}
-
+function startRestSync(){clearInterval(restSyncTimer);const poll=()=>{if(!current)return;Promise.all([restRead('users'),restRead('friendRequests/'+current),restRead('messages')]).then(([remote,requests,remoteMessages])=>{if(remote){const local=users(),merged={...local};Object.entries(remote).forEach(([k,v])=>{merged[k]={...(local[k]||{}),...v}});localStorage.setItem(KEY,JSON.stringify(merged));remoteFriendRequests=requests||{};if(remoteMessages){const msg=messages();Object.entries(remoteMessages).forEach(([k,b])=>{msg[k]=Object.values(b||{})});localStorage.setItem(MSGKEY,JSON.stringify(msg))}renderFriends();if(activeChat)renderChat();update()}}).catch(()=>{})};poll();restSyncTimer=setInterval(poll,2000)}
 function banIsActive(u){return !!(u&&u.banned===true&&(u.banType!=='temporary'||!u.bannedUntil||Date.now()<Number(u.bannedUntil)))}
-
-function initFirebase(){
-try{
-if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
-firebaseDB=firebase.database();
-
-firebaseDB.ref('users').on('value',snap=>{
-const remote={};
-snap.forEach(x=>{remote[x.key]={...x.val(),_key:x.key}});
-const local=users(),merged={...local};
-Object.entries(remote).forEach(([key,value])=>{merged[key]={...(local[key]||{}),...value}});
-if(Object.keys(remote).length){
-localStorage.setItem(KEY,JSON.stringify(merged));
-if(current&&banIsActive(merged[current])){
-localStorage.removeItem(SESSION);
-current=null;
-activeChat=null;
-$('app').classList.add('hidden');
-$('auth').classList.remove('hidden');
-toast('Sua conta foi banida pelo administrador.');
-}else if(current&&!remote[current])syncUser(current);
-if(current){renderProfile();renderFriends();update()}
-}else if(current)syncUser(current);
-});
-
-if(current)firebaseDB.ref('friendRequests/'+current).on('value',snap=>{remoteFriendRequests=snap.val()||{};renderFriends()});
-
-firebaseDB.ref('messages').on('value',snap=>{
-const remote=snap.val()||{};
-const local=messages();
-let total=0;
-Object.entries(remote).forEach(([key,bucket])=>{
-const list=Object.values(bucket||{}).map(m=>({...m,from:m.from||m.fromUid,to:m.to||m.toUid,at:m.at||m.createdAt}));
-local[key]=list;
-total+=list.length;
-});
-localStorage.setItem(MSGKEY,JSON.stringify(local));
-const newest=Object.values(local).flat().reduce((max,m)=>Math.max(max,Number(m.at||m.createdAt||0)),0);
-if(messageHydrated){
-Object.values(local).flat().forEach(m=>{
-const at=Number(m.at||m.createdAt||0),from=m.from||m.fromUid,to=m.to||m.toUid;
-if(to===current&&from!==current&&at>sessionOpenedAt&&from!==activeChat)unreadChats[from]=true;
-});
-if(newest>lastSeenMessageAt)toast('Nova mensagem recebida 💬');
-}else messageHydrated=true;
-lastSeenMessageAt=Math.max(lastSeenMessageAt,newest);
-localStorage.setItem('amigocoin_last_seen_message_at',String(lastSeenMessageAt));
-updateUnreadUi();
-lastMessageCount=total;
-if(activeChat)renderChat();
-});
-
-firebaseDB.ref('payments').on('value',snap=>{localStorage.setItem('amigocoin_payments_remote',JSON.stringify(snap.val()||{}));renderCoinHistory()});
-
-firebaseDB.ref('settings').on('value',snap=>{
-globalSettings=snap.val()||{};
-if(globalSettings.announcement)toast(globalSettings.announcement);
-if(\(('object-reward'))\)('object-reward').textContent=Number(globalSettings.objectScanReward||4);
-if(globalSettings.disableChats&&\(('message-input'))\)('message-input').placeholder='Conversas desativadas pelo administrador';
-});
-
-if(current)firebaseDB.ref('mail/'+current).on('value',snap=>renderMail(snap.val()||{}));
-}catch(e){firebaseDB=null;startRestSync()}
-}
-
-function syncCurrentFromFirebase(){
-if(!firebaseDB||!current)return;
-firebaseDB.ref('users/'+current).once('value').then(snap=>{
-if(snap.exists()){
-const all=users();
-all[current]={...all[current],...snap.val(),_key:current};
-saveUsers(all);
-renderProfile();
-renderFriends();
-update();
-}else syncUser(current);
-});
-firebaseDB.ref('mail/'+current).on('value',snap=>renderMail(snap.val()||{}));
-}
-
+function initFirebase(){try{if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);firebaseDB=firebase.database();firebaseDB.ref('users').on('value',snap=>{const remote={};snap.forEach(x=>{remote[x.key]={...x.val(),_key:x.key}});const local=users();const merged={...local};Object.entries(remote).forEach(([key,value])=>{merged[key]={...(local[key]||{}),...value}});if(Object.keys(remote).length){localStorage.setItem(KEY,JSON.stringify(merged));if(current&&banIsActive(merged[current])){localStorage.removeItem(SESSION);current=null;activeChat=null;$('app').classList.add('hidden');$('auth').classList.remove('hidden');toast('Sua conta foi banida pelo administrador.')}else if(current&&!remote[current])syncUser(current);if(current){renderProfile();renderFriends();update()}}else if(current)syncUser(current)});if(current)firebaseDB.ref('friendRequests/'+current).on('value',snap=>{remoteFriendRequests=snap.val()||{};renderFriends()});firebaseDB.ref('messages').on('value',snap=>{const remote=snap.val()||{};const local=messages();let total=0;Object.entries(remote).forEach(([key,bucket])=>{const list=Object.values(bucket||{}).map(m=>({...m,from:m.from||m.fromUid,to:m.to||m.toUid,at:m.at||m.createdAt}));local[key]=list;total+=list.length});localStorage.setItem(MSGKEY,JSON.stringify(local));const newest=Object.values(local).flat().reduce((max,m)=>Math.max(max,Number(m.at||m.createdAt||0)),0);if(messageHydrated){Object.values(local).flat().forEach(m=>{const at=Number(m.at||m.createdAt||0),from=m.from||m.fromUid,to=m.to||m.toUid;if(to===current&&from!==current&&at>sessionOpenedAt&&from!==activeChat)unreadChats[from]=true});if(newest>lastSeenMessageAt)toast('Nova mensagem recebida 💬')}else messageHydrated=true;lastSeenMessageAt=Math.max(lastSeenMessageAt,newest);localStorage.setItem('amigocoin_last_seen_message_at',String(lastSeenMessageAt));updateUnreadUi();lastMessageCount=total;if(activeChat)renderChat()});firebaseDB.ref('payments').on('value',snap=>{localStorage.setItem('amigocoin_payments_remote',JSON.stringify(snap.val()||{}));renderCoinHistory()});firebaseDB.ref('settings').on('value',snap=>{globalSettings=snap.val()||{};if(globalSettings.announcement)toast(globalSettings.announcement);if($('object-reward'))$('object-reward').textContent=Number(globalSettings.objectScanReward||4);if(globalSettings.disableChats&&$('message-input'))$('message-input').placeholder='Conversas desativadas pelo administrador'});if(current)firebaseDB.ref('mail/'+current).on('value',snap=>renderMail(snap.val()||{}))}catch(e){firebaseDB=null;startRestSync()}}
+function syncCurrentFromFirebase(){if(!firebaseDB||!current)return;firebaseDB.ref('users/'+current).once('value').then(snap=>{if(snap.exists()){const all=users();all[current]={...all[current],...snap.val(),_key:current};saveUsers(all);renderProfile();renderFriends();update()}else syncUser(current)});firebaseDB.ref('mail/'+current).on('value',snap=>renderMail(snap.val()||{}))}
 function messages(){return JSON.parse(localStorage.getItem(MSGKEY)||'{}')}
 function saveMessages(data){localStorage.setItem(MSGKEY,JSON.stringify(data))}
 function payments(){return JSON.parse(localStorage.getItem(PAYKEY)||'{}')}
 function savePayments(data){localStorage.setItem(PAYKEY,JSON.stringify(data))}
 function toast(text){const el=$('toast');el.textContent=text;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2600)}
-
-function setMode(value){
-mode=value;
-$('login-tab').classList.toggle('active',value==='login');
-$('register-tab').classList.toggle('active',value==='register');
-$('auth-submit').textContent=value==='login'?'Entrar agora':'Criar minha conta';
-$('auth-hint').textContent=value==='login'?'Entre com seu nome e senha.':'Sua conta começa com 1 dia grátis.';
-}
-
-$('login-tab').onclick=()=>setMode('login');
-$('register-tab').onclick=()=>setMode('register');
-
-$('auth-form').onsubmit=e=>{
-e.preventDefault();
-const name=\(('username').value.trim().toLowerCase(),pass=\)('password').value;
-const all=users();
-
-if(mode==='register'){
-if(globalSettings.blockSignup)return toast('Cadastro bloqueado pelo administrador.');
-if(all[name])return toast('Esse nome de usuário já existe.');
-all[name]={name,pass,id:makeId(),coins:Number(globalSettings.freeCoins??0),correct:0,createdAt:Date.now(),expiresAt:Date.now()+86400000,friends:[]};
-saveUsers(all);
-current=name;
-localStorage.setItem(SESSION,name);
-initFirebase();
-syncUser(name);
-openApp();
-toast('Conta criada! Você tem 1 dia grátis.');
-}else{
-if(!all[name]||all[name].pass!==pass)return toast('Nome ou senha incorretos.');
-if(banIsActive(all[name]))return toast('Esta conta foi banida pelo administrador.');
-current=name;
-localStorage.setItem(SESSION,name);
-openApp();
-}
-};
-
-function makeId(){
-const part=()=>Math.random().toString(36).slice(2,6).toUpperCase();
-return 'AMG-'+part()+'-'+part()+'-'+part()+'-'+part();
-}
-
-function ensureIds(){
-const all=users();
-let changed=false;
-Object.values(all).forEach(u=>{
-if(!u.id){u.id=makeId();changed=true}
-u.friends=u.friends||[];
-});
-if(changed)saveUsers(all);
-return all;
-}
-
-function openApp(){
-initFirebase();
-const all=ensureIds();
-current=localStorage.getItem(SESSION);
-if(!current||!all[current])return;
-if(banIsActive(all[current])){
-localStorage.removeItem(SESSION);
-current=null;
-toast('Sua conta foi banida pelo administrador.');
-return;
-}
-$('auth').classList.add('hidden');
-$('app').classList.remove('hidden');
-$('hello').textContent=all[current].name;
-$('profile-name').textContent=all[current].name;
-$('profile-id').textContent=all[current].id;
-$('created-at').textContent=new Date(all[current].createdAt).toLocaleDateString('pt-BR');
-renderProfile();
-newQuestion();
-renderFriends();
-renderCoinHistory();
-update();
-syncCurrentFromFirebase();
-clearInterval(timer);
-timer=setInterval(update,1000);
-}
-
+function setMode(value){mode=value;$('login-tab').classList.toggle('active',value==='login');$('register-tab').classList.toggle('active',value==='register');$('auth-submit').textContent=value==='login'?'Entrar agora':'Criar minha conta';$('auth-hint').textContent=value==='login'?'Entre com seu nome e senha.':'Sua conta começa com 1 dia grátis.'}
+$('login-tab').onclick=()=>setMode('login');$('register-tab').onclick=()=>setMode('register');
+$('auth-form').onsubmit=e=>{e.preventDefault();const name=$('username').value.trim().toLowerCase(),pass=$('password').value;const all=users();if(mode==='register'){if(globalSettings.blockSignup)return toast('Cadastro bloqueado pelo administrador.');if(all[name])return toast('Esse nome de usuário já existe.');all[name]={name,pass,id:makeId(),coins:Number((globalSettings.freeCoins!=null?globalSettings.freeCoins:0)),correct:0,createdAt:Date.now(),expiresAt:Date.now()+86400000,friends:[]};saveUsers(all);current=name;localStorage.setItem(SESSION,name);initFirebase();syncUser(name);openApp();toast('Conta criada! Você tem 1 dia grátis.')}else{if(!all[name]||all[name].pass!==pass)return toast('Nome ou senha incorretos.');if(banIsActive(all[name]))return toast('Esta conta foi banida pelo administrador.');current=name;localStorage.setItem(SESSION,name);openApp()}};
+function makeId(){const part=()=>Math.random().toString(36).slice(2,6).toUpperCase();return 'AMG-'+part()+'-'+part()+'-'+part()+'-'+part()}
+function ensureIds(){const all=users();let changed=false;Object.values(all).forEach(u=>{if(!u.id){u.id=makeId();changed=true}u.friends=u.friends||[]});if(changed)saveUsers(all);return all}
+function openApp(){initFirebase();const all=ensureIds();current=localStorage.getItem(SESSION);if(!current||!all[current])return;if(banIsActive(all[current])){localStorage.removeItem(SESSION);current=null;toast('Sua conta foi banida pelo administrador.');return;}$('auth').classList.add('hidden');$('app').classList.remove('hidden');$('hello').textContent=all[current].name;$('profile-name').textContent=all[current].name;$('profile-id').textContent=all[current].id;$('created-at').textContent=new Date(all[current].createdAt).toLocaleDateString('pt-BR');renderProfile();newQuestion();renderFriends();renderCoinHistory();update();syncCurrentFromFirebase();clearInterval(timer);timer=setInterval(update,1000)}
 function getUser(){return users()[current]}
-
-function renderProfile(){
-const u=getUser();
-if(!u)return;
-const avatar=$('profile-avatar');
-if(avatar)avatar.innerHTML=u.photo?`<img src="${u.photo}" alt="Foto de perfil">`:'🙂';
-$('profile-name').innerHTML=escapeHtml(u.name)+(u.verified||u.isVerified?' <span class="verified-badge">✓</span>':'');
-}
-
+function renderProfile(){const u=getUser();if(!u)return;const avatar=$('profile-avatar');if(avatar)avatar.innerHTML=u.photo?`<img src="${u.photo}" alt="Foto de perfil">`:'🙂';$('profile-name').innerHTML=escapeHtml(u.name)+(u.verified||u.isVerified?' <span class="verified-badge">✓</span>':'')}
 function active(){return getUser()&&getUser().expiresAt>Date.now()}
-
-function update(){
-const u=getUser();
-if(!u)return;
-const left=Math.max(0,u.expiresAt-Date.now()),on=left>0,total=Math.max(86400000,u.expiresAt-u.createdAt);
-$('coins-top').textContent=u.coins;
-$('coins-home').textContent=u.coins;
-$('coins-store').textContent=u.coins;
-$('correct-home').textContent=u.correct;
-$('correct-game').textContent=u.correct;
-$('time-left').textContent=on?formatTime(left):'Tempo esgotado';
-$('time-progress').style.width=Math.max(0,Math.min(100,left/total*100))+'%';
-$('time-panel').classList.toggle('expired',!on);
-$('game-card').classList.toggle('hidden',!on);
-$('game-locked').classList.toggle('hidden',on);
-$('friends-content').classList.toggle('hidden',!on);
-$('friends-locked').classList.toggle('hidden',on);
-$('chat-content').classList.toggle('hidden',!on);
-$('chats-locked').classList.toggle('hidden',on);
-$('pay-content').classList.toggle('hidden',!on);
-$('pay-locked').classList.toggle('hidden',on);
-if(!on&&['game','friends','chats','pay'].includes(document.querySelector('.view.active')?.id))showView('store');
-}
-
-function formatTime(ms){
-const d=Math.floor(ms/86400000),h=Math.floor(ms%86400000/3600000),m=Math.floor(ms%3600000/60000),s=Math.floor(ms%60000/1000);
-if(d)return `\({d}d \){h}h ${m}m`;
-return `\({String(h).padStart(2,'0')}:\){String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-}
-
-function newQuestion(){
-if(!active())return;
-const a=Math.floor(Math.random()*12)+2,b=Math.floor(Math.random()*12)+2,ops=['+','−','×'],op=ops[Math.floor(Math.random()*ops.length)];
-answerValue=op==='+'?a+b:op==='−'?a-b:a*b;
-\(('question').textContent=`\){a} \({op} \){b} = ?`;
-$('answer').value='';
-$('game-message').textContent='';
-$('game-message').className='message';
-}
-
-$('answer-form').onsubmit=e=>{
-e.preventDefault();
-if(!active())return update();
-const val=Number($('answer').value),all=users(),u=all[current];
-if(val===answerValue){
-u.coins+=2;
-u.correct+=1;
-saveUsers(all);
-$('game-message').textContent='Acertou! +2 moedas 🪙';
-$('game-message').className='message good';
-update();
-setTimeout(newQuestion,500);
-}else{
-$('game-message').textContent='Não foi dessa vez. Tente novamente!';
-$('game-message').className='message bad';
-$('answer').select();
-}
-};
-
-function buyTime(days,cost){
-const all=users(),u=all[current];
-if(u.coins<cost)return toast(`Você precisa de ${cost} moedas.`);
-u.coins-=cost;
-u.expiresAt=Math.max(Date.now(),u.expiresAt)+days*86400000;
-saveUsers(all);
-update();
-toast(`Pronto! Você comprou +\({days} dia\){days>1?'s':''}.`);
-}
-
+function update(){const u=getUser();if(!u)return;const left=Math.max(0,u.expiresAt-Date.now()),on=left>0,total=Math.max(86400000,u.expiresAt-u.createdAt);$('coins-top').textContent=u.coins;$('coins-home').textContent=u.coins;$('coins-store').textContent=u.coins;$('correct-home').textContent=u.correct;$('correct-game').textContent=u.correct;$('time-left').textContent=on?formatTime(left):'Tempo esgotado';$('time-progress').style.width=Math.max(0,Math.min(100,left/total*100))+'%';$('time-panel').classList.toggle('expired',!on);$('game-card').classList.toggle('hidden',!on);$('game-locked').classList.toggle('hidden',on);$('friends-content').classList.toggle('hidden',!on);$('friends-locked').classList.toggle('hidden',on);$('chat-content').classList.toggle('hidden',!on);$('chats-locked').classList.toggle('hidden',on);$('pay-content').classList.toggle('hidden',!on);$('pay-locked').classList.toggle('hidden',on);if(!on&&['game','friends','chats','pay'].includes((document.querySelector('.view.active')||{}).id))showView('store')}
+function formatTime(ms){const d=Math.floor(ms/86400000),h=Math.floor(ms%86400000/3600000),m=Math.floor(ms%3600000/60000),s=Math.floor(ms%60000/1000);if(d)return `${d}d ${h}h ${m}m`;return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`}
+function newQuestion(){if(!active())return;const a=Math.floor(Math.random()*12)+2,b=Math.floor(Math.random()*12)+2,ops=['+','−','×'],op=ops[Math.floor(Math.random()*ops.length)];answerValue=op==='+'?a+b:op==='−'?a-b:a*b;$('question').textContent=`${a} ${op} ${b} = ?`;$('answer').value='';$('game-message').textContent='';$('game-message').className='message'}
+$('answer-form').onsubmit=e=>{e.preventDefault();if(!active())return update();const val=Number($('answer').value),all=users(),u=all[current];if(val===answerValue){u.coins+=2;u.correct+=1;saveUsers(all);$('game-message').textContent='Acertou! +2 moedas 🪙';$('game-message').className='message good';update();setTimeout(newQuestion,500)}else{$('game-message').textContent='Não foi dessa vez. Tente novamente!';$('game-message').className='message bad';$('answer').select()}};
+function buyTime(days,cost){const all=users(),u=all[current];if(u.coins<cost)return toast(`Você precisa de ${cost} moedas.`);u.coins-=cost;u.expiresAt=Math.max(Date.now(),u.expiresAt)+days*86400000;saveUsers(all);update();toast(`Pronto! Você comprou +${days} dia${days>1?'s':''}.`)}
 function makePaymentId(){return 'PAY-'+Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,8).toUpperCase()}
-
-function makeQrCode(code,title,text){
-$('modal-title').textContent=title;
-$('modal-text').textContent=text;
-$('modal-token').textContent=code;
-$('payment-qr').innerHTML='';
-$('payment-modal').classList.remove('hidden');
-if(window.QRCode)new QRCode($('payment-qr'),{text:code,width:210,height:210,colorDark:'#111111',colorLight:'#ffffff'});
-else $('payment-qr').textContent='QR Code indisponível';
-}
-
-function startCoinPurchase(packageCoins,cost){
-if(!active())return toast('Seu tempo acabou.');
-const id=makePaymentId(),all=payments();
-all[id]={id,type:'coin_purchase',buyer:current,coins:packageCoins,cost,createdAt:Date.now(),expiresAt:Date.now()+15*60*1000,status:'pending'};
-savePayments(all);
-const code=`ACPAY|\({id}|\){current}|\({packageCoins}|\){cost}`;
-makeQrCode(code,'Pague para comprar moedas',`Pacote: \({packageCoins} moedas. O pagador transferirá \){cost} moedas da própria conta para a loja. A compra só será liberada depois do escaneamento.`);
-}
-
-function createTransferQr(target,amount){
-if(!active())return update();
-const all=ensureIds();
-if(!target||!all[target])return toast('Recebedor não encontrado.');
-if(target===current)return toast('Escolha outra conta.');
-if(!Number.isInteger(amount)||amount<1)return toast('Informe uma quantidade válida.');
-const id=makePaymentId(),ps=payments();
-ps[id]={id,type:'transfer',from:current,to:target,amount,createdAt:Date.now(),expiresAt:Date.now()+15*60*1000,status:'pending'};
-savePayments(ps);
-makeQrCode(`ACPAY|\({id}|\){target}|\({amount}|0`,'Cobrança criada',`O pagador deverá escanear este QR Code. Serão transferidas \){amount} moedas para ${all[target].name}.`);
-}
-
-function processScannedCode(code){
-if(!active())return toast('Seu tempo acabou.');
-const p=String(code||'').trim().split('|');
-if(p[0]!=='ACPAY'||p.length<5)return toast('QR Code de pagamento inválido.');
-const id=p[1],ps=payments(),invoice=ps[id];
-if(!invoice||invoice.status!=='pending')return toast('Pagamento inexistente ou já usado.');
-if(invoice.expiresAt<Date.now())return toast('Este QR Code expirou.');
-
-if(invoice.type==='coin_purchase'){
-if(invoice.buyer===current)return toast('Outra conta precisa pagar este QR Code.');
-const all=users();
-if(!all[current]||all[current].coins<invoice.cost)return toast('Você não tem moedas suficientes.');
-all[current].coins-=invoice.cost;
-all[invoice.buyer].coins+=invoice.coins;
-saveUsers(all);
-syncUser(invoice.buyer);
-invoice.status='paid';
-invoice.paidBy=current;
-invoice.paidAt=Date.now();
-savePayments(ps);
-update();
-toast(`Pagamento concluído! ${invoice.coins} moedas foram entregues.`);
-}else{
-if(invoice.to===current)return toast('Você não pode pagar para si mesmo.');
-const all=users();
-if(all[current].coins<invoice.amount)return toast('Você não tem moedas suficientes.');
-all[current].coins-=invoice.amount;
-all[invoice.to].coins+=invoice.amount;
-saveUsers(all);
-syncUser(invoice.to);
-invoice.status='paid';
-invoice.paidBy=current;
-invoice.paidAt=Date.now();
-savePayments(ps);
-update();
-toast(`Pagamento concluído! ${invoice.amount} moedas enviadas.`);
-}
-}
-
-function closePayment(){
-$('payment-modal').classList.add('hidden');
-$('payment-qr').innerHTML='';
-}
-
+function makeQrCode(code,title,text){$('modal-title').textContent=title;$('modal-text').textContent=text;$('modal-token').textContent=code;$('payment-qr').innerHTML='';$('payment-modal').classList.remove('hidden');if(window.QRCode)new QRCode($('payment-qr'),{text:code,width:210,height:210,colorDark:'#111111',colorLight:'#ffffff'});else $('payment-qr').textContent='QR Code indisponível';}
+function startCoinPurchase(packageCoins,cost){if(!active())return toast('Seu tempo acabou.');const id=makePaymentId(),all=payments();all[id]={id,type:'coin_purchase',buyer:current,coins:packageCoins,cost,createdAt:Date.now(),expiresAt:Date.now()+15*60*1000,status:'pending'};savePayments(all);const code=`ACPAY|${id}|${current}|${packageCoins}|${cost}`;makeQrCode(code,'Pague para comprar moedas',`Pacote: ${packageCoins} moedas. O pagador transferirá ${cost} moedas da própria conta para a loja. A compra só será liberada depois do escaneamento.`)}
+function createTransferQr(target,amount){if(!active())return update();const all=ensureIds();if(!target||!all[target])return toast('Recebedor não encontrado.');if(target===current)return toast('Escolha outra conta.');if(!Number.isInteger(amount)||amount<1)return toast('Informe uma quantidade válida.');const id=makePaymentId(),ps=payments();ps[id]={id,type:'transfer',from:current,to:target,amount,createdAt:Date.now(),expiresAt:Date.now()+15*60*1000,status:'pending'};savePayments(ps);makeQrCode(`ACPAY|${id}|${target}|${amount}|0`,'Cobrança criada',`O pagador deverá escanear este QR Code. Serão transferidas ${amount} moedas para ${all[target].name}.`)}
+function processScannedCode(code){if(!active())return toast('Seu tempo acabou.');const p=String(code||'').trim().split('|');if(p[0]!=='ACPAY'||p.length<5)return toast('QR Code de pagamento inválido.');const id=p[1],ps=payments(),invoice=ps[id];if(!invoice||invoice.status!=='pending')return toast('Pagamento inexistente ou já usado.');if(invoice.expiresAt<Date.now())return toast('Este QR Code expirou.');if(invoice.type==='coin_purchase'){if(invoice.buyer===current)return toast('Outra conta precisa pagar este QR Code.');const all=users();if(!all[current]||all[current].coins<invoice.cost)return toast('Você não tem moedas suficientes para pagar.');all[current].coins-=invoice.cost;all[invoice.buyer].coins+=invoice.coins;saveUsers(all);syncUser(invoice.buyer);invoice.status='paid';invoice.paidBy=current;invoice.paidAt=Date.now();savePayments(ps);update();toast(`Pagamento concluído! ${invoice.coins} moedas foram entregues.`)}else{if(invoice.to===current)return toast('Você não pode pagar para si mesmo.');const all=users();if(all[current].coins<invoice.amount)return toast('Você não tem moedas suficientes.');all[current].coins-=invoice.amount;all[invoice.to].coins+=invoice.amount;saveUsers(all);syncUser(invoice.to);invoice.status='paid';invoice.paidBy=current;invoice.paidAt=Date.now();savePayments(ps);update();toast(`Pagamento concluído! ${invoice.amount} moedas enviadas.`)}}
+function closePayment(){ $('payment-modal').classList.add('hidden');$('payment-qr').innerHTML=''}
 $('close-payment').onclick=closePayment;
-\(('scan-confirm').onclick=()=>processScannedCode(\)('scan-code').value);
+$('scan-confirm').onclick=()=>processScannedCode($('scan-code').value);
 
-function updateUnreadUi(){
-const count=Object.keys(unreadChats).length,badge=$('chat-unread-badge'),chatButton=document.querySelector('.nav button[data-view="chats"]');
-if(badge){badge.textContent=count>9?'9+':'!';badge.classList.toggle('hidden',!count)}
-if(chatButton)chatButton.classList.toggle('unread',!!count);
-localStorage.setItem('amigocoin_unread_chats',JSON.stringify(unreadChats));
-}
-
-function renderFriends(){
-const u=getUser();
-if(!u)return;
-u.friends=u.friends||[];
-u.incomingRequests=u.incomingRequests||{};
-const all=users(),requestPanel=\(('friend-requests-panel'),requestBox=\)('friend-requests'),requestMap={...(u.incomingRequests||{}),...remoteFriendRequests},requests=Object.values(requestMap);
-
-if(requests.length){
-requestPanel.classList.remove('hidden');
-requestBox.innerHTML=requests.map(r=>`<div class="friend-item"><div class="avatar">\({escapeHtml((all[r.from]?.name||r.from).slice(0,1).toUpperCase())}</div><div class="grow"><strong>\){escapeHtml(all[r.from]?.name||r.from)}</strong><small>@\({escapeHtml(r.from)} · quer ser seu amigo</small><div class="request-actions"><button class="request-accept" onclick="acceptFriendRequest('\){escapeAttr(r.from)}')">Aceitar</button><button class="request-reject" onclick="rejectFriendRequest('${escapeAttr(r.from)}')">Recusar</button></div></div></div>`).join('');
-}else{
-requestPanel.classList.add('hidden');
-requestBox.innerHTML='';
-}
-
-const box=$('friends-list');
-if(!u.friends.length){
-box.innerHTML='<div class="empty">Você ainda não tem amigos.<br>Envie um pedido para começar.</div>';
-return;
-}
-
-box.innerHTML=u.friends.map(name=>{
-const friend=all[name]||{};
-return `<div class="friend-item \({unreadChats[name]?'unread':''}"><div class="avatar">\){friend.photo?`<img src="\({friend.photo}" alt="">`:'🙂'}</div><div class="grow"><strong>\){escapeHtml(friend.name||name)}\({friend.verified||friend.isVerified?'<span class="verified-badge">✓</span>':''}</strong><small>@\){escapeHtml(name)} · \({escapeHtml(friend.id||'AMG-')}\){unreadChats[name]?'<span class="unread-badge">Nova</span>':''}</small></div><div class="friend-actions"><button onclick="openChat('\({escapeAttr(name)}')">Mensagem</button><button class="secondary" onclick="sendCoinsToFriend('\){escapeAttr(name)}')">🪙 Enviar</button></div></div>`;
-}).join('');
-
-updateUnreadUi();
-}
-
+function updateUnreadUi(){const count=Object.keys(unreadChats).length,badge=$('chat-unread-badge'),chatButton=document.querySelector('.nav button[data-view="chats"]');if(badge){badge.textContent=count>9?'9+':'!';badge.classList.toggle('hidden',!count)}if(chatButton)chatButton.classList.toggle('unread',!!count);localStorage.setItem('amigocoin_unread_chats',JSON.stringify(unreadChats))}
+function renderFriends(){const u=getUser();if(!u)return;u.friends=u.friends||[];u.incomingRequests=u.incomingRequests||{};const all=users(),requestPanel=$('friend-requests-panel'),requestBox=$('friend-requests'),requestMap={...(u.incomingRequests||{}),...remoteFriendRequests},requests=Object.values(requestMap);if(requests.length){requestPanel.classList.remove('hidden');requestBox.innerHTML=requests.map(r=>`<div class="friend-item"><div class="avatar">${escapeHtml(((all[r.from]&&all[r.from].name)||r.from).slice(0,1).toUpperCase())}</div><div class="grow"><strong>${escapeHtml((all[r.from]&&all[r.from].name)||r.from)}</strong><small>@${escapeHtml(r.from)} · quer ser seu amigo</small><div class="request-actions"><button class="request-accept" onclick="acceptFriendRequest('${escapeAttr(r.from)}')">Aceitar</button><button class="request-reject" onclick="rejectFriendRequest('${escapeAttr(r.from)}')">Recusar</button></div></div></div>`).join('')}else{requestPanel.classList.add('hidden');requestBox.innerHTML=''}const box=$('friends-list');if(!u.friends.length){box.innerHTML='<div class="empty">Você ainda não tem amigos.<br>Envie um pedido para começar.</div>';return}box.innerHTML=u.friends.map(name=>{const friend=all[name]||{};return `<div class="friend-item ${unreadChats[name]?'unread':''}"><div class="avatar">${friend.photo?`<img src="${friend.photo}" alt="">`:'🙂'}</div><div class="grow"><strong>${escapeHtml(friend.name||name)}${friend.verified||friend.isVerified?'<span class="verified-badge">✓</span>':''}</strong><small>@${escapeHtml(name)} · ${escapeHtml(friend.id||'AMG-')}${unreadChats[name]?'<span class="unread-badge">Nova</span>':''}</small></div><div class="friend-actions"><button onclick="openChat('${escapeAttr(name)}')">Mensagem</button><button class="secondary" onclick="sendCoinsToFriend('${escapeAttr(name)}')">🪙 Enviar</button></div></div>`}).join('');updateUnreadUi()}
 function escapeHtml(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function escapeAttr(v){return String(v).replace(/[^a-zA-Z0-9_\-]/g,'')}
-
-function showFriendPreview(target){
-previewTarget=target;
-const all=users(),u=all[target]||{},panel=\(('friend-preview-panel'),avatar=\)('friend-preview-avatar');
-panel.classList.remove('hidden');
-avatar.innerHTML=u.photo?`<img src="${u.photo}" alt="">`:escapeHtml((u.name||target).slice(0,1).toUpperCase());
-$('friend-preview-name').innerHTML=escapeHtml(u.name||target)+(u.verified||u.isVerified?' <span class="verified-badge">✓</span>':'');
-$('friend-preview-id').textContent=u.id||'AMG-';
-$('friend-preview-coins').textContent=Number(u.coins||0).toLocaleString('pt-BR');
-$('friend-preview-likes').textContent=Number(u.likes||0).toLocaleString('pt-BR');
-const liked=!!(u.likedBy&&u.likedBy[current]);
-$('friend-preview-like').classList.toggle('liked',liked);
-$('friend-preview-like').textContent=liked?'♥ Curtido':'♡ Curtir';
-$('friend-preview-add').textContent=u.friends?.includes(current)?'Já são amigos':(users()[current]?.outgoingRequests?.[target]?'Pedido enviado':'Enviar pedido');
-$('friend-preview-add').disabled=u.friends?.includes(current)||!!users()[current]?.outgoingRequests?.[target];
-}
-
-async function likePreview(){
-if(!previewTarget||previewTarget===current)return toast('Escolha outro usuário.');
-const all=ensureIds(),target=all[previewTarget];
-
-try{
-const remote=await restRead('users/'+encodeURIComponent(previewTarget));
-if(remote&&remote.likedBy&&remote.likedBy[current])return toast('Você já curtiu esta conta.');
-const updates={};
-updates['users/'+previewTarget+'/likedBy/'+current]=Date.now();
-updates['users/'+previewTarget+'/likes']=Number((remote&&remote.likes)||target.likes||0)+1;
-await restPatch(updates);
-target.likedBy=target.likedBy||{};
-target.likedBy[current]=Date.now();
-target.likes=Number(target.likes||0)+1;
-showFriendPreview(previewTarget);
-toast('Like enviado!');
-}catch(e){
-toast('Não foi possível enviar o like agora.');
-}
-}
-
+function showFriendPreview(target){previewTarget=target;const all=users(),u=all[target]||{},panel=$('friend-preview-panel'),avatar=$('friend-preview-avatar');panel.classList.remove('hidden');avatar.innerHTML=u.photo?`<img src="${u.photo}" alt="">`:escapeHtml((u.name||target).slice(0,1).toUpperCase());$('friend-preview-name').innerHTML=escapeHtml(u.name||target)+(u.verified||u.isVerified?' <span class="verified-badge">✓</span>':'');$('friend-preview-id').textContent=u.id||'AMG-';$('friend-preview-coins').textContent=Number(u.coins||0).toLocaleString('pt-BR');$('friend-preview-likes').textContent=Number(u.likes||0).toLocaleString('pt-BR');const liked=!!(u.likedBy&&u.likedBy[current]);$('friend-preview-like').classList.toggle('liked',liked);$('friend-preview-like').textContent=liked?'♥ Curtido':'♡ Curtir';$('friend-preview-add').textContent=(u.friends&&u.friends.includes(current))?'Já são amigos':((users()[current]&&users()[current].outgoingRequests&&users()[current].outgoingRequests[target])?'Pedido enviado':'Enviar pedido');$('friend-preview-add').disabled=(u.friends&&u.friends.includes(current))||!!(users()[current]&&users()[current].outgoingRequests&&users()[current].outgoingRequests[target])}
+async function likePreview(){if(!previewTarget||previewTarget===current)return toast('Escolha outro usuário.');const all=ensureIds(),target=all[previewTarget];try{const remote=await restRead('users/'+encodeURIComponent(previewTarget));if(remote&&remote.likedBy&&remote.likedBy[current])return toast('Você já curtiu esta conta.');const updates={};updates['users/'+previewTarget+'/likedBy/'+current]=Date.now();updates['users/'+previewTarget+'/likes']=Number((remote&&remote.likes)||target.likes||0)+1;await restPatch(updates);target.likedBy=target.likedBy||{};target.likedBy[current]=Date.now();target.likes=Number(target.likes||0)+1;showFriendPreview(previewTarget);toast('Like enviado!')}catch(e){toast('Não foi possível enviar o like agora.')}}
 $('friend-preview-like').onclick=likePreview;
+$('friend-form').onsubmit=async e=>{e.preventDefault();if(!active())return update();const query=$('friend-name').value.trim(),all=ensureIds();let target=query.toLowerCase().startsWith('amg-')?Object.keys(all).find(k=>String(all[k].id||'').toLowerCase()===query.toLowerCase()):query.toLowerCase();if(!target||!all[target]){try{const remote=await restRead('users');if(remote){Object.entries(remote).forEach(([key,value])=>{all[key]={...(all[key]||{}),...value}});localStorage.setItem(KEY,JSON.stringify(all));target=query.toLowerCase().startsWith('amg-')?Object.keys(all).find(k=>String(all[k].id||'').toLowerCase()===query.toLowerCase()):query.toLowerCase()}}catch(e){}}if(!target||!all[target])return toast('Conta não encontrada. Confira o nome ou ID.');if(target===current)return toast('Você não pode adicionar a si mesmo.');showFriendPreview(target)};
 
-$('friend-form').onsubmit=async e=>{
-e.preventDefault();
-if(!active())return update();
+$('friend-preview-add').onclick=async()=>{if(!previewTarget)return;const all=ensureIds(),target=previewTarget;if((all[current].friends&&all[current].friends.includes(target)))return toast('Esse usuário já é seu amigo.');all[current].outgoingRequests=all[current].outgoingRequests||{};all[target].incomingRequests=all[target].incomingRequests||{};if(all[current].outgoingRequests[target])return toast('Pedido já enviado.');const request={from:current,to:target,createdAt:Date.now()};all[current].outgoingRequests[target]=request;all[target].incomingRequests[current]=request;try{const updates={};updates['users/'+current+'/outgoingRequests/'+target]=request;updates['users/'+target+'/incomingRequests/'+current]=request;updates['friendRequests/'+target+'/'+current]=request;try{if(firebaseDB)await firebaseDB.ref().update(updates);else await restPatch(updates)}catch(error){await restPatch(updates)}localStorage.setItem(KEY,JSON.stringify(all));showFriendPreview(target);renderFriends();toast('Pedido enviado!')}catch(e){toast('Não foi possível enviar o pedido agora.')}};
 
-const query=$('friend-name').value.trim(),all=ensureIds();
-let target=query.toLowerCase().startsWith('amg-')?Object.keys(all).find(k=>String(all[k].id||'').toLowerCase()===query.toLowerCase()):query.toLowerCase();
+async function acceptFriendRequest(from){const all=ensureIds(),u=all[current],r=(u.incomingRequests&&u.incomingRequests[from])||remoteFriendRequests[from];if(!r||!all[from])return toast('Pedido não encontrado.');u.friends=u.friends||[];all[from].friends=all[from].friends||[];if(!u.friends.includes(from))u.friends.push(from);if(!all[from].friends.includes(current))all[from].friends.push(current);if(u.incomingRequests)delete u.incomingRequests[from];if(all[from].outgoingRequests)delete all[from].outgoingRequests[current];try{const updates={};updates['users/'+current+'/friends']=u.friends;updates['users/'+from+'/friends']=all[from].friends;updates['users/'+current+'/incomingRequests/'+from]=null;updates['users/'+from+'/outgoingRequests/'+current]=null;updates['friendRequests/'+current+'/'+from]=null;try{if(firebaseDB)await firebaseDB.ref().update(updates);else await restPatch(updates)}catch(error){await restPatch(updates)}localStorage.setItem(KEY,JSON.stringify(all));delete remoteFriendRequests[from];renderFriends();toast('Pedido aceito!')}catch(e){toast('Não foi possível aceitar o pedido agora.')}}
 
-if(!target||!all[target]){
-try{
-const remote=await restRead('users');
-if(remote){
-Object.entries(remote).forEach(([key,value])=>{all[key]={...(all[key]||{}),...value}});
-localStorage.setItem(KEY,JSON.stringify(all));
-target=query.toLowerCase().startsWith('amg-')?Object.keys(all).find(k=>String(all[k].id||'').toLowerCase()===query.toLowerCase()):query.toLowerCase();
-}
-}catch(e){}
-}
-
-if(!target||!all[target])return toast('Conta não encontrada. Confira o nome ou ID.');
-if(target===current)return toast('Você não pode adicionar a si mesmo.');
-showFriendPreview(target);
-};
-
-$('friend-preview-add').onclick=async()=>{
-if(!previewTarget)return;
-const all=ensureIds(),target=previewTarget;
-if(all[current].friends?.includes(target))return toast('Esse usuário já é seu amigo.');
-
-all[current].outgoingRequests=all[current].outgoingRequests||{};
-all[target].incomingRequests=all[target].incomingRequests||{};
-if(all[current].outgoingRequests[target])return toast('Pedido já enviado.');
-
-const request={from:current,to:target,createdAt:Date.now()};
-all[current].outgoingRequests[target]=request;
-all[target].incomingRequests[current]=request;
-
-try{
-const updates={};
-updates['users/'+current+'/outgoingRequests/'+target]=request;
-updates['users/'+target+'/incomingRequests/'+current]=request;
-updates['friendRequests/'+target+'/'+current]=request;
-
-try{
-if(firebaseDB)await firebaseDB.ref().update(updates);
-else await restPatch(updates);
-}catch(error){
-await restPatch(updates);
-}
-
-localStorage.setItem(KEY,JSON.stringify(all));
-showFriendPreview(target);
-renderFriends();
-toast('Pedido enviado!');
-}catch(e){
-toast('Não foi possível enviar o pedido agora.');
-}
-};
-
-async function acceptFriendRequest(from){
-const all=ensureIds(),u=all[current],r=(u.incomingRequests&&u.incomingRequests[from])||remoteFriendRequests[from];
-if(!r||!all[from])return toast('Pedido não encontrado.');
-
-u.friends=u.friends||[];
-all[from].friends=all[from].friends||[];
-if(!u.friends.includes(from))u.friends.push(from);
-if(!all[from].friends.includes(current))all[from].friends.push(current);
-if(u.incomingRequests)delete u.incomingRequests[from];
-if(all[from].outgoingRequests)delete all[from].outgoingRequests[current];
-
-try{
-const updates={};
-updates['users/'+current+'/friends']=u.friends;
-updates['users/'+from+'/friends']=all[from].friends;
-updates['users/'+current+'/incomingRequests/'+from]=null;
-updates['users/'+from+'/outgoingRequests/'+current]=null;
-updates['friendRequests/'+current+'/'+from]=null;
-
-try{
-if(firebaseDB)await firebaseDB.ref().update(updates);
-else await restPatch(updates);
-}catch(error){
-await restPatch(updates);
-}
-
-localStorage.setItem(KEY,JSON.stringify(all));
-delete remoteFriendRequests[from];
-renderFriends();
-toast('Pedido aceito!');
-}catch(e){
-toast('Não foi possível aceitar o pedido agora.');
-}
-}
-
-async function rejectFriendRequest(from){
-const all=ensureIds(),u=all[current];
-if(u.incomingRequests)delete u.incomingRequests[from];
-if(all[from]?.outgoingRequests)delete all[from].outgoingRequests[current];
-
-try{
-const updates={};
-updates['users/'+current+'/incomingRequests/'+from]=null;
-updates['users/'+from+'/outgoingRequests/'+current]=null;
-updates['friendRequests/'+current+'/'+from]=null;
-
-try{
-if(firebaseDB)await firebaseDB.ref().update(updates);
-else await restPatch(updates);
-}catch(error){
-await restPatch(updates);
-}
-
-localStorage.setItem(KEY,JSON.stringify(all));
-delete remoteFriendRequests[from];
-renderFriends();
-toast('Pedido recusado.');
-}catch(e){
-toast('Não foi possível recusar o pedido agora.');
-}
-}
+async function rejectFriendRequest(from){const all=ensureIds(),u=all[current];if(u.incomingRequests)delete u.incomingRequests[from];if(all[from]&&all[from].outgoingRequests)delete all[from].outgoingRequests[current];try{const updates={};updates['users/'+current+'/incomingRequests/'+from]=null;updates['users/'+from+'/outgoingRequests/'+current]=null;updates['friendRequests/'+current+'/'+from]=null;try{if(firebaseDB)await firebaseDB.ref().update(updates);else await restPatch(updates)}catch(error){await restPatch(updates)}localStorage.setItem(KEY,JSON.stringify(all));delete remoteFriendRequests[from];renderFriends();toast('Pedido recusado.')}catch(e){toast('Não foi possível recusar o pedido agora.')}}
 
 function chatKey(a,b){return [a,b].sort().join('|')}
+function sendCoinsToFriend(name){if(!active())return update();const all=ensureIds(),u=all[current],friend=all[name];if(!friend)return toast('Conta do amigo não encontrada.');if(!(u.friends&&u.friends.includes(name)))return toast('Adicione esse amigo primeiro.');const amount=Number(prompt('Quantas moedas deseja enviar para '+name+'?','1'));if(!Number.isInteger(amount)||amount<1)return toast('Informe uma quantidade válida.');if(Number(u.coins||0)<amount)return toast('Você não tem moedas suficientes.');u.coins-=amount;friend.coins=Number(friend.coins||0)+amount;const id=makePaymentId(),ps=payments();ps[id]={id,type:'transfer',from:current,to:name,amount,createdAt:Date.now(),status:'paid',paidAt:Date.now()};saveUsers(all);savePayments(ps);syncUser(current);syncUser(name);update();renderFriends();renderCoinHistory();toast(amount+' moedas enviadas!')}
 
-function openChat(name){
-if(!active())return update();
-const all=users();
-if(!all[current].friends?.includes(name))return toast('Adicione esse amigo primeiro.');
-activeChat=name;
-delete unreadChats[name];
-updateUnreadUi();
-$('chat-empty').classList.add('hidden');
-$('chat-box').classList.remove('hidden');
-$('chat-name').innerHTML=escapeHtml(all[name].name)+(all[name].verified||all[name].isVerified?' <span class="verified-badge">✓</span>':'');
-$('chat-user').textContent='@'+name;
-renderChat();
-showView('chats');
-}
-
-function renderChat(){
-if(!activeChat)return;
-const list=(messages()[chatKey(current,activeChat)]||[]).map(m=>({...m,from:m.from||m.fromUid,at:m.at||m.createdAt}));
-const box=$('chat-messages');
-box.innerHTML=list.length?list.map(m=>`<div class="bubble \({m.from===current?'mine':'theirs'}">\){m.audio?`<audio class="audio-message" controls preload="metadata" src="\({m.audio}"></audio>`:escapeHtml(m.text||'')}<time>\){new Date(m.at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</time></div>`).join(''):'<div class="empty">Nenhuma mensagem ainda.</div>';
-box.scrollTop=box.scrollHeight;
-}
-
-function sendChatMessage(payload){
-if(globalSettings.disableChats)return toast('Conversas desativadas pelo administrador.');
-if(!active()||!activeChat)return update();
-const all=messages(),key=chatKey(current,activeChat),msg={from:current,to:activeChat,...payload,at:Date.now(),createdAt:Date.now()};
-all[key]=all[key]||[];
-all[key].push(msg);
-saveMessages(all);
-
-if(firebaseDB)firebaseDB.ref('messages/'+key).push(msg);
-else fetch(`\({REST_DB_URL}/messages/\){encodeURIComponent(key)}.json`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(msg)}).catch(()=>{});
-
-renderChat();
-}
-
-$('message-form').onsubmit=e=>{
-e.preventDefault();
-const text=$('message-input').value.trim();
-if(!text)return;
-sendChatMessage({text});
-$('message-input').value='';
-};
-
-function sendAudioBlob(blob){
-if(blob.size>900000)return toast('Áudio muito grande. Grave no máximo 30 segundos.');
-const reader=new FileReader();
-reader.onload=()=>sendChatMessage({audio:reader.result});
-reader.readAsDataURL(blob);
-}
-
-\(('choose-audio').onclick=()=>\)('audio-input').click();
-
-$('audio-input').onchange=e=>{
-const file=e.target.files?.[0];
-if(file)sendAudioBlob(file);
-e.target.value='';
-};
-
-$('record-audio').onclick=async()=>{
-if(mediaRecorder&&mediaRecorder.state==='recording'){
-mediaRecorder.stop();
-return;
-}
-
-if(!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder)return $('audio-input').click();
-
-try{
-const stream=await navigator.mediaDevices.getUserMedia({audio:true});
-audioChunks=[];
-mediaRecorder=new MediaRecorder(stream);
-mediaRecorder.ondataavailable=e=>{if(e.data.size)audioChunks.push(e.data)};
-mediaRecorder.onstop=()=>{
-clearTimeout(audioTimer);
-stream.getTracks().forEach(t=>t.stop());
-$('record-audio').classList.remove('recording');
-$('record-audio').textContent='🎙️';
-sendAudioBlob(new Blob(audioChunks,{type:mediaRecorder.mimeType||'audio/webm'}));
-mediaRecorder=null;
-};
-mediaRecorder.start();
-$('record-audio').classList.add('recording');
-$('record-audio').textContent='⏹️';
-audioTimer=setTimeout(()=>{if(mediaRecorder?.state==='recording')mediaRecorder.stop()},30000);
-toast('Gravando áudio... toque novamente para enviar.');
-}catch(e){
-toast('Permita o microfone para gravar áudio.');
-}
-};
-
-function objectHash(video){
-const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d'),size=16;
-canvas.width=size;
-canvas.height=size;
-ctx.drawImage(video,0,0,size,size);
-const data=ctx.getImageData(0,0,size,size).data,gray=[];
-for(let i=0;i<data.length;i+=4)gray.push((data[i]*299+data[i+1]*587+data[i+2]*114)/1000);
-const avg=gray.reduce((a,b)=>a+b,0)/gray.length;
-return gray.map(v=>v>=avg?'1':'0').join('');
-}
-
-function hashDistance(a,b){
-if(!a||!b||a.length!==b.length)return 999;
-let n=0;
-for(let i=0;i<a.length;i++)if(a[i]!==b[i])n++;
-return n;
-}
-
-async function scanObject(){
-if(!active())return update();
-if(!firebaseDB)return toast('Conecte o Firebase para usar esta recompensa.');
-const video=\(('object-camera'),status=\)('object-scan-status');
-
-try{
-const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
-video.srcObject=stream;
-video.classList.remove('hidden');
-await video.play();
-status.textContent='Aponte para o objeto cadastrado e aguarde...';
-await new Promise(r=>setTimeout(r,1200));
-const hash=objectHash(video);
-stream.getTracks().forEach(t=>t.stop());
-video.srcObject=null;
-video.classList.add('hidden');
-
-const snap=await firebaseDB.ref('objectRewards').once('value'),objects=snap.val()||{};
-const match=Object.values(objects).find(o=>o.status==='active'&&hashDistance(o.hash,hash)<=42);
-
-if(!match){
-status.textContent='Objeto não reconhecido.';
-return toast('Esse objeto não está cadastrado ou já foi usado.');
-}
-
-firebaseDB.ref('objectRewards/'+match.id).transaction(value=>value&&value.status==='active'?{...value,status:'redeemed',redeemedBy:current,redeemedAt:Date.now()}:undefined,(error,committed)=>{
-if(error||!committed)return toast('Esse objeto já foi resgatado.');
-firebaseDB.ref('users/'+current+'/coins').transaction(value=>Number(value||0)+Number(match.amount||0),(error2,committed2,snap2)=>{
-if(error2||!committed2)return toast('Não foi possível adicionar as moedas.');
-const all=users();
-if(all[current])all[current].coins=Number(snap2.val()||0);
-localStorage.setItem(KEY,JSON.stringify(all));
-firebaseDB.ref('mail/'+current).push({type:'gift',subject:'Recompensa recebida',text:`Você recebeu ${match.amount} moedas pelo objeto escaneado.`,createdAt:Date.now(),read:false});
-status.textContent=`Objeto confirmado: +${match.amount} moedas!`;
-update();
-toast(`Objeto confirmado! +${match.amount} moedas 🪙`);
-});
-});
-}catch(e){
-toast('Não foi possível acessar a câmera.');
-}
-}
-
-function redeemCoinQr(code){
-if(!firebaseDB)return toast('Conecte o Firebase para resgatar este QR.');
-const parts=String(code||'').trim().split('|');
-if(parts[0]!=='AMGCOIN'||parts.length<3)return toast('QR de moedas inválido.');
-const id=parts[1],amount=Number(parts[2]);
-if(!id||!Number.isInteger(amount)||amount<1)return toast('QR de moedas inválido.');
-
-firebaseDB.ref('coinQrCodes/'+id).transaction(value=>value&&value.status==='pending'?{...value,status:'redeemed',redeemedBy:current,redeemedAt:Date.now()}:undefined,(error,committed)=>{
-if(error||!committed)return toast('Este QR já foi usado ou expirou.');
-firebaseDB.ref('users/'+current+'/coins').transaction(value=>Number(value||0)+amount,(error2,committed2,snap)=>{
-if(error2||!committed2)return toast('Não foi possível adicionar as moedas.');
-const all=users();
-if(all[current])all[current].coins=Number(snap.val()||0);
-localStorage.setItem(KEY,JSON.stringify(all));
-update();
-$('redeem-code').value='';
-toast(`${amount} moedas adicionadas! 🪙`);
-});
-});
-}
-
-function redeemCode(){
-if(!active())return toast('Seu tempo acabou.');
-const code=$('redeem-code').value.trim().toUpperCase();
-if(code.indexOf('AMGCOIN|')===0)return redeemCoinQr(code);
-const values={'JOAOZINHO':4};
-if(!values[code])return toast('Código inválido.');
-const all=users(),u=all[current];
-u.coins+=values[code];
-saveUsers(all);
-$('redeem-code').value='';
-update();
-toast(`Código resgatado: +${values[code]} moedas!`);
-}
-
-$('redeem-form').onsubmit=e=>{
-e.preventDefault();
-redeemCode();
-};
-
-async function openCamera(videoId){
-try{
-const video=$(videoId);
-video.srcObject=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
-video.classList.remove('hidden');
-video.play();
-toast('Câmera aberta. Digite o código manualmente se o QR não for reconhecido.');
-}catch(e){
-toast('Não foi possível abrir a câmera neste navegador.');
-}
-}
-
-async function decodeQrFile(file){
-if(!file)return;
-try{
-const img=new Image(),url=URL.createObjectURL(file);
-img.onload=()=>{
-const canvas=document.createElement('canvas');
-canvas.width=img.naturalWidth;
-canvas.height=img.naturalHeight;
-const ctx=canvas.getContext('2d');
-ctx.drawImage(img,0,0);
-let value=null;
-
-if(window.jsQR){
-const data=ctx.getImageData(0,0,canvas.width,canvas.height);
-const code=jsQR(data.data,data.width,data.height);
-value=code&&code.data;
-}
-
-URL.revokeObjectURL(url);
-
-if(value){
-if(file._target==='store')redeemCode(value);
-else processScannedCode(value);
-}else toast('Não encontrei um QR Code nessa imagem.');
-};
-
-img.onerror=()=>toast('Não foi possível abrir a imagem.');
-img.src=url;
-}catch(e){
-toast('Não foi possível ler o QR Code.');
-}
-}
-
-async function startCoinQrScanner(){
-try{
-const video=$('store-camera');
-video.srcObject=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
-video.classList.remove('hidden');
-await video.play();
-
-if(!('BarcodeDetector' in window))return toast('Seu navegador não lê QR automaticamente. Digite o código do QR.');
-
-const detector=new BarcodeDetector({formats:['qr_code']}),canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');
-clearInterval(scanTimer);
-
-scanTimer=setInterval(async()=>{
-if(video.readyState<2)return;
-canvas.width=video.videoWidth;
-canvas.height=video.videoHeight;
-ctx.drawImage(video,0,0,canvas.width,canvas.height);
-
-try{
-const codes=await detector.detect(canvas),value=codes[0]?.rawValue;
-if(value&&value.indexOf('AMGCOIN|')===0){
-clearInterval(scanTimer);
-video.srcObject?.getTracks().forEach(t=>t.stop());
-video.classList.add('hidden');
-redeemCoinQr(value);
-}
-}catch(e){}
-},500);
-}catch(e){
-toast('Não foi possível abrir a câmera. Digite o código do QR.');
-}
-}
-
-$('camera-store').onclick=startCoinQrScanner;
-\(('gallery-store').onclick=()=>\)('gallery-store-input').click();
-
-$('gallery-store-input').onchange=e=>{
-const f=e.target.files?.[0];
-if(f){
-f._target='store';
-decodeQrFile(f);
-}
-e.target.value='';
-};
-
-$('object-scan').onclick=scanObject;
-
+function openChat(name){if(!active())return update();const all=users();if(!(all[current].friends&&all[current].friends.includes(name)))return toast('Adicione esse amigo primeiro.');activeChat=name;delete unreadChats[name];updateUnreadUi();$('chat-empty').classList.add('hidden');$('chat-box').classList.remove('hidden');$('chat-name').innerHTML=escapeHtml(all[name].name)+(all[name].verified||all[name].isVerified?' <span class="verified-badge">✓</span>':'');$('chat-user').textContent='@'+name;renderChat();showView('chats')}
+function renderChat(){if(!activeChat)return;const list=(messages()[chatKey(current,activeChat)]||[]).map(m=>({...m,from:m.from||m.fromUid,at:m.at||m.createdAt}));const box=$('chat-messages');box.innerHTML=list.length?list.map(m=>`<div class="bubble ${m.from===current?'mine':'theirs'}">${m.audio?`<audio class="audio-message" controls preload="metadata" src="${m.audio}"></audio>`:escapeHtml(m.text||'')}<time>${new Date(m.at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</time></div>`).join(''):'<div class="empty">Nenhuma mensagem ainda.</div>';box.scrollTop=box.scrollHeight}
+function sendChatMessage(payload){if(globalSettings.disableChats)return toast('Conversas desativadas pelo administrador.');if(!active()||!activeChat)return update();const all=messages(),key=chatKey(current,activeChat),msg={from:current,to:activeChat,...payload,at:Date.now(),createdAt:Date.now()};all[key]=all[key]||[];all[key].push(msg);saveMessages(all);if(firebaseDB)firebaseDB.ref('messages/'+key).push(msg);else fetch(`${REST_DB_URL}/messages/${encodeURIComponent(key)}.json`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(msg)}).catch(()=>{});renderChat()}
+$('message-form').onsubmit=e=>{e.preventDefault();const text=$('message-input').value.trim();if(!text)return;sendChatMessage({text});$('message-input').value=''};
+function sendAudioBlob(blob){if(blob.size>900000)return toast('Áudio muito grande. Grave no máximo 30 segundos.');const reader=new FileReader();reader.onload=()=>sendChatMessage({audio:reader.result});reader.readAsDataURL(blob)}
+$('choose-audio').onclick=()=>$('audio-input').click();$('audio-input').onchange=e=>{const file=e.target.files&&e.target.files[0];if(file)sendAudioBlob(file);e.target.value=''};
+$('record-audio').onclick=async()=>{if(mediaRecorder&&mediaRecorder.state==='recording'){mediaRecorder.stop();return}if(!navigator.mediaDevices&&navigator.mediaDevices.getUserMedia||!window.MediaRecorder)return $('audio-input').click();try{const stream=await navigator.mediaDevices.getUserMedia({audio:true});audioChunks=[];mediaRecorder=new MediaRecorder(stream);mediaRecorder.ondataavailable=e=>{if(e.data.size)audioChunks.push(e.data)};mediaRecorder.onstop=()=>{clearTimeout(audioTimer);stream.getTracks().forEach(t=>t.stop());$('record-audio').classList.remove('recording');$('record-audio').textContent='🎙️';sendAudioBlob(new Blob(audioChunks,{type:mediaRecorder.mimeType||'audio/webm'}));mediaRecorder=null};mediaRecorder.start();$('record-audio').classList.add('recording');$('record-audio').textContent='⏹️';audioTimer=setTimeout(()=>{if(mediaRecorder&&mediaRecorder.state==='recording')mediaRecorder.stop()},30000);toast('Gravando áudio... toque novamente para enviar.')}catch(e){toast('Permita o microfone para gravar áudio.')}};
+function objectHash(video){const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d'),size=16;canvas.width=size;canvas.height=size;ctx.drawImage(video,0,0,size,size);const data=ctx.getImageData(0,0,size,size).data,gray=[];for(let i=0;i<data.length;i+=4)gray.push((data[i]*299+data[i+1]*587+data[i+2]*114)/1000);const avg=gray.reduce((a,b)=>a+b,0)/gray.length;return gray.map(v=>v>=avg?'1':'0').join('')}
+function hashDistance(a,b){if(!a||!b||a.length!==b.length)return 999;let n=0;for(let i=0;i<a.length;i++)if(a[i]!==b[i])n++;return n}
+async function scanObject(){if(!active())return update();if(!firebaseDB)return toast('Conecte o Firebase para usar esta recompensa.');const video=$('object-camera'),status=$('object-scan-status');try{const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});video.srcObject=stream;video.classList.remove('hidden');await video.play();status.textContent='Aponte para o objeto cadastrado e aguarde...';await new Promise(r=>setTimeout(r,1200));const hash=objectHash(video);stream.getTracks().forEach(t=>t.stop());video.srcObject=null;video.classList.add('hidden');const snap=await firebaseDB.ref('objectRewards').once('value'),objects=snap.val()||{};const match=Object.values(objects).find(o=>o.status==='active'&&hashDistance(o.hash,hash)<=42);if(!match){status.textContent='Objeto não reconhecido.';return toast('Esse objeto não está cadastrado ou já foi usado.')}firebaseDB.ref('objectRewards/'+match.id).transaction(value=>value&&value.status==='active'?{...value,status:'redeemed',redeemedBy:current,redeemedAt:Date.now()}:undefined,(error,committed)=>{if(error||!committed)return toast('Esse objeto já foi resgatado.');firebaseDB.ref('users/'+current+'/coins').transaction(value=>Number(value||0)+Number(match.amount||0),(error2,committed2,snap2)=>{if(error2||!committed2)return toast('Não foi possível adicionar as moedas.');const all=users();if(all[current])all[current].coins=Number(snap2.val()||0);localStorage.setItem(KEY,JSON.stringify(all));firebaseDB.ref('mail/'+current).push({type:'gift',subject:'Recompensa recebida',text:`Você recebeu ${match.amount} moedas pelo objeto escaneado.`,createdAt:Date.now(),read:false});status.textContent=`Objeto confirmado: +${match.amount} moedas!`;update();toast(`Objeto confirmado! +${match.amount} moedas 🪙`)})})}catch(e){toast('Não foi possível acessar a câmera.')}}
+function redeemCoinQr(code){if(!firebaseDB)return toast('Conecte o Firebase para resgatar este QR.');const parts=String(code||'').trim().split('|');if(parts[0]!=='AMGCOIN'||parts.length<3)return toast('QR de moedas inválido.');const id=parts[1],amount=Number(parts[2]);if(!id||!Number.isInteger(amount)||amount<1)return toast('QR de moedas inválido.');firebaseDB.ref('coinQrCodes/'+id).transaction(value=>value&&value.status==='pending'?{...value,status:'redeemed',redeemedBy:current,redeemedAt:Date.now()}:undefined,(error,committed)=>{if(error||!committed)return toast('Este QR já foi usado ou expirou.');firebaseDB.ref('users/'+current+'/coins').transaction(value=>Number(value||0)+amount,(error2,committed2,snap)=>{if(error2||!committed2)return toast('Não foi possível adicionar as moedas.');const all=users();if(all[current])all[current].coins=Number(snap.val()||0);localStorage.setItem(KEY,JSON.stringify(all));update();$('redeem-code').value='';toast(`${amount} moedas adicionadas! 🪙`)})})}
+function redeemCode(){if(!active())return toast('Seu tempo acabou.');const code=$('redeem-code').value.trim().toUpperCase();if(code.indexOf('AMGCOIN|')===0)return redeemCoinQr(code);const values={'JOAOZINHO':4};if(!values[code])return toast('Código inválido.');const all=users(),u=all[current];u.coins+=values[code];saveUsers(all);$('redeem-code').value='';update();toast(`Código resgatado: +${values[code]} moedas!`)}
+$('redeem-form').onsubmit=e=>{e.preventDefault();redeemCode()};
+async function openCamera(videoId){try{const video=$(videoId);video.srcObject=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});video.classList.remove('hidden');video.play();toast('Câmera aberta. Digite o código manualmente se o QR não for reconhecido.')}catch(e){toast('Não foi possível abrir a câmera neste navegador.')}}
+async function decodeQrFile(file){if(!file)return;try{const img=new Image(),url=URL.createObjectURL(file);img.onload=()=>{const canvas=document.createElement('canvas');canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0);let value=null;if(window.jsQR){const data=ctx.getImageData(0,0,canvas.width,canvas.height);const code=jsQR(data.data,data.width,data.height);value=code&&code.data}URL.revokeObjectURL(url);if(value){if(file._target==='store')redeemCode(value);else processScannedCode(value)}else toast('Não encontrei um QR Code nessa imagem.');};img.onerror=()=>toast('Não foi possível abrir a imagem.');img.src=url}catch(e){toast('Não foi possível ler o QR Code.')}}
+async function startCoinQrScanner(){try{const video=$('store-camera');video.srcObject=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});video.classList.remove('hidden');await video.play();if(!('BarcodeDetector' in window))return toast('Seu navegador não lê QR automaticamente. Digite o código do QR.');const detector=new BarcodeDetector({formats:['qr_code']}),canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');clearInterval(scanTimer);scanTimer=setInterval(async()=>{if(video.readyState<2)return;canvas.width=video.videoWidth;canvas.height=video.videoHeight;ctx.drawImage(video,0,0,canvas.width,canvas.height);try{const codes=await detector.detect(canvas),value=codes[0]&&codes[0].rawValue;if(value&&value.indexOf('AMGCOIN|')===0){clearInterval(scanTimer);video.srcObject&&video.srcObject.getTracks().forEach(t=>t.stop());video.classList.add('hidden');redeemCoinQr(value)}}catch(e){}},500)}catch(e){toast('Não foi possível abrir a câmera. Digite o código do QR.')}}
+$('camera-store').onclick=startCoinQrScanner;$('gallery-store').onclick=()=>$('gallery-store-input').click();$('gallery-store-input').onchange=e=>{const f=e.target.files&&e.target.files[0];if(f){f._target='store';decodeQrFile(f)}e.target.value=''};$('object-scan').onclick=scanObject;
 let scanTimer=null;
-
-async function startQrScanner(){
-try{
-const video=$('pay-camera');
-video.srcObject=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
-video.classList.remove('hidden');
-await video.play();
-
-if(!('BarcodeDetector' in window))return toast('Seu navegador não lê QR pela câmera. Cole o código abaixo.');
-
-const detector=new BarcodeDetector({formats:['qr_code']});
-const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');
-clearInterval(scanTimer);
-
-scanTimer=setInterval(async()=>{
-if(video.readyState<2)return;
-canvas.width=video.videoWidth;
-canvas.height=video.videoHeight;
-ctx.drawImage(video,0,0,canvas.width,canvas.height);
-
-try{
-const codes=await detector.detect(canvas);
-if(codes[0]?.rawValue){
-clearInterval(scanTimer);
-video.srcObject?.getTracks().forEach(t=>t.stop());
-$('scan-code').value=codes[0].rawValue;
-processScannedCode(codes[0].rawValue);
-}
-}catch(e){}
-},500);
-}catch(e){
-toast('Não foi possível abrir a câmera. Cole o código do QR.');
-}
-}
-
-$('camera-pay').onclick=startQrScanner;
-\(('gallery-pay').onclick=()=>\)('gallery-pay-input').click();
-
-$('gallery-pay-input').onchange=e=>{
-const f=e.target.files?.[0];
-if(f){
-f._target='pay';
-decodeQrFile(f);
-}
-e.target.value='';
-};
-
-$('pay-form').onsubmit=e=>{
-e.preventDefault();
-if(!active())return update();
-
-const query=\(('pay-target').value.trim(),amount=Number(\)('pay-amount').value),all=ensureIds();
-const target=query.toLowerCase().startsWith('amg-')?Object.keys(all).find(k=>all[k].id.toLowerCase()===query.toLowerCase()):query.toLowerCase();
-
-if(!target||!all[target])return toast('Recebedor não encontrado.');
-if(!all[current].friends?.includes(target))return toast('Adicione esse usuário como amigo primeiro.');
-createTransferQr(target,amount);
-};
-
-$('photo-input').onchange=e=>{
-const file=e.target.files?.[0];
-if(!file)return;
-if(file.size>1200000)return toast('Escolha uma foto de até 1,2 MB.');
-
-const reader=new FileReader();
-reader.onload=()=>{
-const all=users();
-all[current].photo=reader.result;
-saveUsers(all);
-syncUser(current);
-renderProfile();
-renderFriends();
-toast('Foto de perfil atualizada!');
-};
-reader.readAsDataURL(file);
-};
-
-function copyId(){
-const id=getUser()?.id||'';
-if(navigator.clipboard)navigator.clipboard.writeText(id);
-toast('ID copiado: '+id);
-}
-
-function renderCoinHistory(){
-const box=$('coin-history');
-if(!box)return;
-const remote=JSON.parse(localStorage.getItem('amigocoin_payments_remote')||'{}');
-const local=payments();
-const allPayments={...remote,...local};
-const rows=Object.values(allPayments).filter(p=>p.type==='transfer'&&(p.from===current||p.to===current)).sort((a,b)=>Number(b.createdAt||0)-Number(a.createdAt||0));
-const all=users();
-
-box.innerHTML=rows.length?rows.map(p=>{
-const incoming=p.to===current;
-const other=all[incoming?p.from:p.to];
-return `<div class="friend-item"><div class="avatar">\({incoming?'⬇️':'⬆️'}</div><div class="grow"><strong class="\){incoming?'coin-in':'coin-out'}">\({incoming?'+':'-'}\){p.amount||p.coins||0} moedas</strong><small>\({incoming?'Recebido de':'Enviado para'} \){escapeHtml(other?.name||(incoming?p.from:p.to)||'usuário')} · ${new Date(Number(p.createdAt||Date.now())).toLocaleString('pt-BR')}</small></div></div>`;
-}).join(''):'<div class="empty">Nenhuma transferência ainda.</div>';
-}
-
-function renderMail(data){
-const box=$('mail-list');
-if(!box)return;
-const items=Object.entries(data||{}).map(([key,v])=>({...v,_mailKey:key})).sort((a,b)=>Number(b.createdAt||0)-Number(a.createdAt||0));
-
-box.innerHTML=items.length?items.map(m=>`<div class="friend-item" style="align-items:flex-start"><div class="avatar">\({m.type==='gift'?'🎁':'📨'}</div><div class="grow"><strong>\){escapeHtml(m.subject||'Aviso')}</strong><small>\({escapeHtml(m.text||m.message||'')} · \){new Date(Number(m.createdAt||Date.now())).toLocaleString('pt-BR')}</small></div>${m.read?'':'<span class="status verify">Novo</span>'}</div>`).join(''):'<div class="empty">Nenhuma mensagem.</div>';
-
-if(items.some(m=>!m.read)&&firebaseDB&&current){
-const updates={};
-items.filter(m=>!m.read).forEach(m=>updates['mail/'+current+'/'+m._mailKey+'/read']=true);
-firebaseDB.ref().update(updates);
-}
-}
-
-function showView(id){
-if(!active()&&['game','friends','chats','pay'].includes(id)){
-toast('Seu tempo acabou. Compre mais tempo para continuar.');
-id='store';
-}
-document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===id));
-document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===id));
-if(id==='friends')renderFriends();
-if(id==='chats'&&activeChat)renderChat();
-if(id==='mail')renderCoinHistory();
-if(id==='game'&&active()&&!$('question').textContent.includes('?'))newQuestion();
-}
-
+async function startQrScanner(){try{const video=$('pay-camera');video.srcObject=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});video.classList.remove('hidden');await video.play();if(!('BarcodeDetector' in window))return toast('Seu navegador não lê QR pela câmera. Cole o código abaixo.');const detector=new BarcodeDetector({formats:['qr_code']});const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');clearInterval(scanTimer);scanTimer=setInterval(async()=>{if(video.readyState<2)return;canvas.width=video.videoWidth;canvas.height=video.videoHeight;ctx.drawImage(video,0,0,canvas.width,canvas.height);try{const codes=await detector.detect(canvas);if(codes[0]&&codes[0].rawValue){clearInterval(scanTimer);video.srcObject&&video.srcObject.getTracks().forEach(t=>t.stop());$('scan-code').value=codes[0].rawValue;processScannedCode(codes[0].rawValue)}}catch(e){}},500)}catch(e){toast('Não foi possível abrir a câmera. Cole o código do QR.')}}
+$('camera-pay').onclick=startQrScanner;$('gallery-pay').onclick=()=>$('gallery-pay-input').click();$('gallery-pay-input').onchange=e=>{const f=e.target.files&&e.target.files[0];if(f){f._target='pay';decodeQrFile(f)}e.target.value=''};
+$('pay-form').onsubmit=e=>{e.preventDefault();if(!active())return update();const query=$('pay-target').value.trim(),amount=Number($('pay-amount').value),all=ensureIds();const target=query.toLowerCase().startsWith('amg-')?Object.keys(all).find(k=>all[k].id.toLowerCase()===query.toLowerCase()):query.toLowerCase();if(!target||!all[target])return toast('Recebedor não encontrado.');if(!(all[current].friends&&all[current].friends.includes(target)))return toast('Adicione esse usuário como amigo primeiro.');createTransferQr(target,amount)};
+$('photo-input').onchange=e=>{const file=e.target.files&&e.target.files[0];if(!file)return;if(file.size>1200000)return toast('Escolha uma foto de até 1,2 MB.');const reader=new FileReader();reader.onload=()=>{const all=users();all[current].photo=reader.result;saveUsers(all);syncUser(current);renderProfile();renderFriends();toast('Foto de perfil atualizada!')};reader.readAsDataURL(file)};
+function copyId(){const id=getUser()&&getUser().id||'';if(navigator.clipboard)navigator.clipboard.writeText(id);toast('ID copiado: '+id)}
+function renderCoinHistory(){const box=$('coin-history');if(!box)return;const remote=JSON.parse(localStorage.getItem('amigocoin_payments_remote')||'{}');const local=payments();const allPayments={...remote,...local};const rows=Object.values(allPayments).filter(p=>p.type==='transfer'&&(p.from===current||p.to===current)).sort((a,b)=>Number(b.createdAt||0)-Number(a.createdAt||0));const all=users();box.innerHTML=rows.length?rows.map(p=>{const incoming=p.to===current;const other=all[incoming?p.from:p.to];return `<div class="friend-item"><div class="avatar">${incoming?'⬇️':'⬆️'}</div><div class="grow"><strong class="${incoming?'coin-in':'coin-out'}">${incoming?'+':'-'}${p.amount||p.coins||0} moedas</strong><small>${incoming?'Recebido de':'Enviado para'} ${escapeHtml(other&&other.name|| (incoming?p.from:p.to)||'usuário')} · ${new Date(Number(p.createdAt||Date.now())).toLocaleString('pt-BR')}</small></div></div>`}).join(''):'<div class="empty">Nenhuma transferência ainda.</div>'}
+function renderMail(data){const box=$('mail-list');if(!box)return;const items=Object.entries(data||{}).map(([key,v])=>({...v,_mailKey:key})).sort((a,b)=>Number(b.createdAt||0)-Number(a.createdAt||0));box.innerHTML=items.length?items.map(m=>`<div class="friend-item" style="align-items:flex-start"><div class="avatar">${m.type==='gift'?'🎁':'📨'}</div><div class="grow"><strong>${escapeHtml(m.subject||'Aviso')}</strong><small>${escapeHtml(m.text||m.message||'')} · ${new Date(Number(m.createdAt||Date.now())).toLocaleString('pt-BR')}</small></div>${m.read?'':'<span class="status verify">Novo</span>'}</div>`).join(''):'<div class="empty">Nenhuma mensagem.</div>';if(items.some(m=>!m.read)&&firebaseDB&&current){const updates={};items.filter(m=>!m.read).forEach(m=>updates['mail/'+current+'/'+m._mailKey+'/read']=true);firebaseDB.ref().update(updates)}}
+function showView(id){if(!active()&&['game','friends','chats','pay'].includes(id)){toast('Seu tempo acabou. Compre mais tempo para continuar.');id='store'}document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===id));document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===id));if(id==='friends')renderFriends();if(id==='chats'&&activeChat)renderChat();if(id==='mail')renderCoinHistory();if(id==='game'&&active()&&!$('question').textContent.includes('?'))newQuestion()}
 document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>showView(b.dataset.view));
-
-$('logout').onclick=()=>{
-localStorage.removeItem(SESSION);
-clearInterval(timer);
-current=null;
-activeChat=null;
-$('app').classList.add('hidden');
-$('auth').classList.remove('hidden');
-$('auth-form').reset();
-setMode('login');
-};
-
-(function boot(){
-const saved=localStorage.getItem(SESSION);
-if(saved&&ensureIds()[saved]){
-current=saved;
-openApp();
-}
-})();
+$('logout').onclick=()=>{localStorage.removeItem(SESSION);clearInterval(timer);current=null;activeChat=null;$('app').classList.add('hidden');$('auth').classList.remove('hidden');$('auth-form').reset();setMode('login')};
+(function boot(){const saved=localStorage.getItem(SESSION);if(saved&&ensureIds()[saved]){current=saved;openApp()}})();
 </script>
 </body>
 </html>
